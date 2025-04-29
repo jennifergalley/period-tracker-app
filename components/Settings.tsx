@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable } from 'react-native';
 import { useAppState } from './AppStateContext';
 import { useTheme } from './Theme';
 import * as FileSystem from 'expo-file-system';
@@ -10,7 +10,7 @@ const EMOJI_OPTIONS = Array.from(new Set([
 ]));
 
 const Settings: React.FC = () => {
-  const { weightUnit, setWeightUnit, setWeightLogs, setPeriodDays, setSymptomLogs, setAllSymptoms } = useAppState();
+  const { weightUnit, setWeightUnit, setWeightLogs, setPeriodDays, setSymptomLogs, setAllSymptoms, autoAddPeriodDays, setAutoAddPeriodDays, periodAutoLogLength, setPeriodAutoLogLength } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
@@ -136,6 +136,42 @@ const Settings: React.FC = () => {
       {showSymptomAdded && (
         <View style={{ position: 'absolute', top: 60, alignSelf: 'center', backgroundColor: theme.accent, borderRadius: 8, padding: 12, zIndex: 100 }}>
           <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Symptom added!</Text>
+        </View>
+      )}
+      {/* --- Period Logging Preference --- */}
+      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Period Logging</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+        <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>
+          Auto-add all period days after logging the first day
+        </Text>
+        <Switch
+          value={autoAddPeriodDays}
+          onValueChange={setAutoAddPeriodDays}
+          trackColor={{ false: theme.border, true: theme.accent }}
+          thumbColor={autoAddPeriodDays ? theme.fabText : theme.card}
+        />
+      </View>
+      {/* --- Period Auto-Log Length Picker --- */}
+      {autoAddPeriodDays && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>
+            Number of days to auto-log:
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Pressable
+              onPress={() => setPeriodAutoLogLength(l => Math.max(1, l - 1))}
+              style={{ backgroundColor: theme.card, borderRadius: 8, padding: 8, marginRight: 8 }}
+            >
+              <Text style={{ color: theme.text, fontSize: 20 }}>-</Text>
+            </Pressable>
+            <Text style={{ color: theme.text, fontSize: 18, minWidth: 32, textAlign: 'center' }}>{periodAutoLogLength}</Text>
+            <Pressable
+              onPress={() => setPeriodAutoLogLength(l => Math.min(14, l + 1))}
+              style={{ backgroundColor: theme.card, borderRadius: 8, padding: 8, marginLeft: 8 }}
+            >
+              <Text style={{ color: theme.text, fontSize: 20 }}>+</Text>
+            </Pressable>
+          </View>
         </View>
       )}
       {/* --- Delete All Data Button --- */}

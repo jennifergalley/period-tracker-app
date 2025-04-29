@@ -14,6 +14,7 @@ const Home: React.FC = () => {
     periodDays, setPeriodDays,
     symptomLogs, setSymptomLogs,
     allSymptoms, setAllSymptoms,
+    autoAddPeriodDays,
   } = useAppState();
   const today = startOfDay(new Date());
 
@@ -32,9 +33,12 @@ const Home: React.FC = () => {
           const dStr = date.toDateString();
           const month = date.getMonth();
           const year = date.getFullYear();
-          const periodDaysThisMonth = getPeriodDaysThisMonth(periodDays, date);
+          const periodDaysThisMonth = periodDays.filter(d => {
+            const dObj = new Date(d);
+            return dObj.getMonth() === month && dObj.getFullYear() === year;
+          });
           if (!periodDays.includes(dStr)) {
-            if (periodDaysThisMonth.length === 0) {
+            if (autoAddPeriodDays && periodDaysThisMonth.length === 0) {
               const newDays = Array.from({ length: 5 }, (_, i) => {
                 const newDate = new Date(date);
                 newDate.setDate(newDate.getDate() + i);

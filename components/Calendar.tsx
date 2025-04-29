@@ -32,6 +32,7 @@ export const Calendar: React.FC = () => {
     periodDays, setPeriodDays,
     symptomLogs, setSymptomLogs,
     allSymptoms, setAllSymptoms,
+    autoAddPeriodDays, periodAutoLogLength
   } = useAppState(); // allSymptoms: Symptom[]
 
   const today = new Date();
@@ -59,15 +60,14 @@ export const Calendar: React.FC = () => {
       return dObj.getMonth() === month && dObj.getFullYear() === year;
     });
     if (!periodDays.includes(dStr)) {
-      // If this is the first period day in the month, auto-add 5 days
-      if (periodDaysThisMonth.length === 0) {
-        const newDays = Array.from({ length: 5 }, (_, i) => {
+      if (autoAddPeriodDays && periodDaysThisMonth.length === 0) {
+        const newDays = Array.from({ length: periodAutoLogLength }, (_, i) => {
           const newDate = new Date(date);
           newDate.setDate(newDate.getDate() + i);
           return newDate.toDateString();
         });
         setPeriodDays(prev => [...prev, ...newDays]
-          .filter((v, i, arr) => arr.indexOf(v) === i) // dedupe
+          .filter((v, i, arr) => arr.indexOf(v) === i)
           .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
         );
       } else {
@@ -76,7 +76,6 @@ export const Calendar: React.FC = () => {
         );
       }
     } else {
-      // Remove just this day
       setPeriodDays(prev => prev.filter(d => d !== dStr));
     }
   }

@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Keyboard } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from './Theme';
+import { useAppState } from './AppStateContext';
 
 interface DayViewProps {
   date: Date;
@@ -21,25 +22,22 @@ interface DayViewProps {
   onToggleWeightUnit: () => void;
 }
 
-const EMOJI_OPTIONS = Array.from(new Set([
-  '😀','😁','😂','🤣','😊','😍','😎','😢','😭','😡','😱','😴','🤒','🤕','🤢','🤧','🥵','🥶','🥳','😇','🤠','🤡','💩','👻','💤','💢','🤕','💨','😡','😴','🤲','🍽️','📝','💥','🧠','🧴','🍔','🤧','😷','🤒','🤕','😵','🤯','🥴','🥺','😬','😳','😶','😐','😑','😒','🙄','😏','😣','😖','😫','😩','🥱','😤','😠','😡','🤬','😈','👿','💀','☠️','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦥','🦦','🦨','🦡','🐁','🐀','🐇','🐿️','🦔'
-]));
-
 const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) => {
   const { theme } = useTheme();
   const {
     date, isPeriod, isFertile, isOvulation, onTogglePeriod,
-    onAddSymptom, onRemoveSymptom, periodDaysThisMonth,
-    weightLog, onLogWeight, weightUnit, onToggleWeightUnit
+    periodDaysThisMonth, weightLog, onLogWeight, 
   } = props;
+    const {
+      weightUnit,
+      autoAddPeriodDays,
+      periodAutoLogLength
+    } = useAppState();
 
-  const [newSymptom, setNewSymptom] = useState('');
-  const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
   const [showSymptoms, setShowSymptoms] = useState(false);
   const [weightInput, setWeightInput] = useState(weightLog ? String(weightLog.value) : '');
   const [showWeight, setShowWeight] = useState(false);
   const weightInputRef = useRef<TextInput>(null);
-  const addSymptomInputRef = useRef<TextInput>(null);
 
   // Update input if user switches days
   React.useEffect(() => {
@@ -68,9 +66,7 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
           <Text style={[styles.weightSaveBtnText, { color: theme.background }]}> 
             {isPeriod
               ? 'Remove Period'
-              : periodDaysThisMonth.length === 0
-                ? 'Log first day of period'
-                : 'Log Period'}
+              : 'Log Period'}
           </Text>
         </TouchableOpacity>
         {/* --- Symptom Logging Section --- */}
