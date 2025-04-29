@@ -4,6 +4,7 @@ import DayView from './DayView';
 import { useAppState } from './AppStateContext';
 import { calculateCycleInfo, getPeriodDaysThisMonth } from '../features/period/cycleUtils';
 import { useTheme } from './theme';
+import { startOfDay } from 'date-fns';
 
 const Home: React.FC = () => {
   const { theme } = useTheme();
@@ -14,7 +15,7 @@ const Home: React.FC = () => {
     symptomLogs, setSymptomLogs,
     allSymptoms, setAllSymptoms,
   } = useAppState();
-  const today = new Date(2025, 3, 29); // April is month 3 (0-based)
+  const today = startOfDay(new Date());
 
   // Use utility function for cycle info
   const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);

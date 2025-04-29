@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Keyboard, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Keyboard } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from './theme';
 
@@ -21,7 +21,6 @@ interface DayViewProps {
   onToggleWeightUnit: () => void;
 }
 
-// Deduplicate emoji options to avoid duplicate keys
 const EMOJI_OPTIONS = Array.from(new Set([
   '😀','😁','😂','🤣','😊','😍','😎','😢','😭','😡','😱','😴','🤒','🤕','🤢','🤧','🥵','🥶','🥳','😇','🤠','🤡','💩','👻','💤','💢','🤕','💨','😡','😴','🤲','🍽️','📝','💥','🧠','🧴','🍔','🤧','😷','🤒','🤕','😵','🤯','🥴','🥺','😬','😳','😶','😐','😑','😒','🙄','😏','😣','😖','😫','😩','🥱','😤','😠','😡','🤬','😈','👿','💀','☠️','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦥','🦦','🦨','🦡','🐁','🐀','🐇','🐿️','🦔'
 ]));
@@ -39,7 +38,6 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
   const [showSymptoms, setShowSymptoms] = useState(false);
   const [weightInput, setWeightInput] = useState(weightLog ? String(weightLog.value) : '');
   const [showWeight, setShowWeight] = useState(false);
-  const [emojiPickerVisible, setEmojiPickerVisible] = useState(false);
   const weightInputRef = useRef<TextInput>(null);
   const addSymptomInputRef = useRef<TextInput>(null);
 
@@ -91,7 +89,7 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
                   triggerHaptic();
                   Alert.alert(
                     'Remove Symptom',
-                    `Remove "${symptom.name}" from your checklist? This will also remove it from any day it was logged.`,
+                    `Remove "${symptom.name}" from your symptom list? This will also remove it from any day it was logged.`,
                     [
                       { text: 'Cancel', style: 'cancel' },
                       { text: 'Remove', style: 'destructive', onPress: () => props.onRemoveSymptom(symptom.name) },
@@ -103,47 +101,6 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
                 <Text style={[styles.symptomTextVertical, { color: theme.text }, symptoms.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
               </TouchableOpacity>
             ))}
-          </View>
-        )}
-        {showSymptoms && (
-          <View style={styles.addSymptomRow}>
-            <TouchableOpacity
-              onPress={() => setEmojiPickerVisible(true)}
-              style={[styles.addSymptomInput, { width: 48, backgroundColor: theme.inputBg, borderColor: theme.border, alignItems: 'center', justifyContent: 'center' }]}
-            >
-              <Text style={{ fontSize: 24 }}>{newSymptomEmoji || '😀'}</Text>
-            </TouchableOpacity>
-            <TextInput
-              ref={addSymptomInputRef}
-              style={[styles.addSymptomInput, { backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
-              placeholder="Add symptom"
-              placeholderTextColor={theme.legendText}
-              value={newSymptom}
-              onChangeText={setNewSymptom}
-              onSubmitEditing={() => {
-                if (newSymptom.trim()) {
-                  addSymptomInputRef.current?.blur();
-                  onAddSymptom(newSymptom.trim(), newSymptomEmoji.trim() || '📝');
-                  setNewSymptom('');
-                  setNewSymptomEmoji('');
-                  Keyboard.dismiss();
-                }
-              }}
-            />
-            <TouchableOpacity
-              style={[styles.addSymptomBtn, { backgroundColor: theme.accent }]}
-              onPress={() => {
-                if (newSymptom.trim()) {
-                  addSymptomInputRef.current?.blur();
-                  onAddSymptom(newSymptom.trim(), newSymptomEmoji.trim() || '📝');
-                  setNewSymptom('');
-                  setNewSymptomEmoji('');
-                  Keyboard.dismiss();
-                }
-              }}
-            >
-              <Text style={[styles.addSymptomBtnText, { color: theme.background }]}>Add</Text>
-            </TouchableOpacity>
           </View>
         )}
         {/* --- Weight Logging Section --- */}
@@ -182,39 +139,6 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
           <Text style={[styles.weightLoggedText, { color: theme.text }]}>Logged: {weightLog.value} {weightLog.unit}</Text>
         )}
       </ScrollView>
-      {/* --- Emoji Picker Modal (for custom symptom) --- */}
-      <Modal
-        visible={emojiPickerVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEmojiPickerVisible(false)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
-          <View style={{ backgroundColor: theme.background, borderRadius: 12, overflow: 'hidden', elevation: 8, width: '90%', maxWidth: 400, height: 380, justifyContent: 'center', alignItems: 'center', padding: 12 }}>
-            <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>Pick an emoji</Text>
-            <ScrollView contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }} style={{ maxHeight: 260, width: '100%' }}>
-              {EMOJI_OPTIONS.map(emoji => (
-                <TouchableOpacity
-                  key={emoji}
-                  style={{ padding: 8, margin: 2, borderRadius: 8, backgroundColor: newSymptomEmoji === emoji ? theme.accent : 'transparent' }}
-                  onPress={() => {
-                    setNewSymptomEmoji(emoji);
-                    setEmojiPickerVisible(false);
-                  }}
-                >
-                  <Text style={{ fontSize: 28 }}>{emoji}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity
-              style={{ marginTop: 8, padding: 10, alignSelf: 'center', backgroundColor: theme.card, borderRadius: 8 }}
-              onPress={() => setEmojiPickerVisible(false)}
-            >
-              <Text style={{ color: theme.text, fontWeight: 'bold' }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </>
   );
 };
