@@ -3,8 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import DayView from './DayView';
 import { useAppState } from './AppStateContext';
 import { calculateCycleInfo, getPeriodDaysThisMonth } from '../features/period/cycleUtils';
+import { useTheme } from './theme';
 
 const Home: React.FC = () => {
+  const { theme } = useTheme();
   const {
     weightLogs, setWeightLogs,
     weightUnit, setWeightUnit,
@@ -18,7 +20,7 @@ const Home: React.FC = () => {
   const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <DayView
         date={today}
         isPeriod={periodDays.includes(today.toDateString())}
@@ -62,10 +64,10 @@ const Home: React.FC = () => {
           });
         }}
         symptomList={allSymptoms}
-        onAddSymptom={symptomName => {
+        onAddSymptom={(symptomName, emoji) => {
           setAllSymptoms(prev => prev.some(s => s.name === symptomName)
             ? prev
-            : [...prev, { name: symptomName, icon: '📝' }]); // Default icon if not provided
+            : [...prev, { name: symptomName, icon: emoji }]);
         }}
         onRemoveSymptom={symptomName => {
           setAllSymptoms(prev => prev.filter(s => s.name !== symptomName));
@@ -93,7 +95,7 @@ const Home: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#181a20' },
+  container: { flex: 1 },
 });
 
 export default Home;

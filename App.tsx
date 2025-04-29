@@ -5,52 +5,50 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import WeightTracker from './components/WeightTracker';
 import Calendar from './components/Calendar';
 import Home from './components/Home';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppStateProvider } from './components/AppStateContext';
 import Settings from './components/Settings';
+import { ThemeProvider, useTheme } from './components/theme';
 
 const Drawer = createDrawerNavigator();
 
-function AppNavigator() {
-  return (
-    <Drawer.Navigator
-      initialRouteName="Home"
-      screenOptions={{
-        headerStyle: { backgroundColor: '#181a20' },
-        headerTintColor: '#fff',
-        drawerStyle: { backgroundColor: '#181a20' },
-        drawerActiveTintColor: '#4db8ff',
-        drawerInactiveTintColor: '#bbb',
-        drawerLabelStyle: { fontWeight: 'bold' },
-      }}
-    >
-      <Drawer.Screen name="Home">
-        {() => <Home />}
-      </Drawer.Screen>
-      <Drawer.Screen name="Period Tracker">
-        {() => <Calendar />}
-      </Drawer.Screen>
-      <Drawer.Screen name="Weight Tracker">
-        {() => <WeightTracker />}
-      </Drawer.Screen>
-      <Drawer.Screen name="Settings" options={{ drawerLabel: 'Settings', drawerItemStyle: { marginTop: 'auto' } }}>
-        {() => <Settings />}
-      </Drawer.Screen>
-    </Drawer.Navigator>
-  );
-}
-
-export default function App() {
+function AppWithTheme() {
+  const { theme } = useTheme();
   return (
     <AppStateProvider>
       <NavigationContainer>
-        <AppNavigator />
+        <Drawer.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            headerStyle: { backgroundColor: theme.card },
+            headerTintColor: theme.text,
+            drawerStyle: { backgroundColor: theme.card },
+            drawerActiveTintColor: theme.accent,
+            drawerInactiveTintColor: theme.legendText,
+            drawerLabelStyle: { fontWeight: 'bold' },
+          }}
+        >
+          <Drawer.Screen name="Home">
+            {() => <Home />}
+          </Drawer.Screen>
+          <Drawer.Screen name="Period Tracker">
+            {() => <Calendar />}
+          </Drawer.Screen>
+          <Drawer.Screen name="Weight Tracker">
+            {() => <WeightTracker />}
+          </Drawer.Screen>
+          <Drawer.Screen name="Settings" options={{ drawerLabel: 'Settings', drawerItemStyle: { marginTop: 'auto' } }}>
+            {() => <Settings />}
+          </Drawer.Screen>
+        </Drawer.Navigator>
       </NavigationContainer>
     </AppStateProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  weightTrackerContainer: { flex: 1, backgroundColor: '#181a20', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 32 },
-  weightTrackerHeading: { color: '#fff', fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
-});
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppWithTheme />
+    </ThemeProvider>
+  );
+}

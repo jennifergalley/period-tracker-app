@@ -7,5 +7,8 @@ export const DEFAULT_SYMPTOMS = [
   { name: 'Fatigue', icon: '😴' },
   { name: 'Tender Breasts', icon: '🤲' },
   { name: 'Hunger', icon: '🍽️' },
+  { name: 'Diarrhea', icon: '💩' },
+  { name: 'Constipation', icon: '🚽' },
+  { name: 'Horny', icon: '😏' },
   // Add more as needed
 ];

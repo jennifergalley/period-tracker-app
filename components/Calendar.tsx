@@ -7,6 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useAppState } from './AppStateContext';
 import { startOfDay } from 'date-fns';
+import { useTheme } from './theme';
 
 // Helper to get days in month
 function getDaysInMonth(year: number, month: number) {
@@ -18,25 +19,12 @@ function getFirstDayOfWeek(year: number, month: number) {
   return new Date(year, month, 1).getDay();
 }
 
-// Color codes for dark mode
-const COLORS = {
-  period: '#ff5c8a', // bright pink
-  fertile: '#4db8ff', // light blue
-  ovulation: '#ffb6c1', // soft pink
-  default: '#23242a', // dark gray for empty days
-  text: '#fff', // white text
-  border: '#333', // subtle border
-  modalBg: '#23242a', // modal background
-  inputBg: '#181a20', // input background
-  inputText: '#fff', // input text
-  legendText: '#bbb', // legend text
-};
-
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4; // 4 for margin
 const TODAY = startOfDay(new Date());
 
 export const Calendar: React.FC = () => {
+  const { theme, themeName } = useTheme();
   const {
     weightLogs, setWeightLogs,
     weightUnit, setWeightUnit,
@@ -66,10 +54,10 @@ export const Calendar: React.FC = () => {
 
   function getDayColor(date: Date) {
     const dStr = date.toDateString();
-    if (periodDays.includes(dStr)) return COLORS.period;
-    if (ovulationDay && dStr === ovulationDay.toDateString()) return COLORS.ovulation;
-    if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) return COLORS.fertile;
-    return COLORS.default;
+    if (periodDays.includes(dStr)) return theme.period;
+    if (ovulationDay && dStr === ovulationDay.toDateString()) return theme.ovulation;
+    if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) return theme.fertile;
+    return theme.card;
   }
 
   // Toggle period day
@@ -198,27 +186,26 @@ export const Calendar: React.FC = () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
-      <StatusBar style="light" />
-      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['left', 'right', 'bottom']}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={prevMonth}><Text style={styles.navBtn}>{'<'}</Text></TouchableOpacity>
-          <Text style={styles.headerText}>
+          <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
+          <Text style={[styles.headerText, { color: theme.text }]}>
             {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
           </Text>
-          <TouchableOpacity onPress={nextMonth}><Text style={styles.navBtn}>{'>'}</Text></TouchableOpacity>
+          <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
         </View>
-        {/* Move legend right below the month view and make text bigger */}
         <View style={styles.legend}>
-          <View style={[styles.legendDot, { backgroundColor: COLORS.period }]} />
-          <Text style={styles.legendText}>Period</Text>
-          <View style={[styles.legendDot, { backgroundColor: COLORS.fertile }]} />
-          <Text style={styles.legendText}>Fertile Window</Text>
-          <View style={[styles.legendDot, { backgroundColor: COLORS.ovulation }]} />
-          <Text style={styles.legendText}>Ovulation</Text>
+          <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
+          <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
+          <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
+          <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
+          <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
+          <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
         </View>
         <View style={styles.weekRow}>
-          {['S','M','T','W','T','F','S'].map((d, i) => <Text key={i} style={styles.weekDay}>{d}</Text>)}
+          {['S','M','T','W','T','F','S'].map((d, i) => <Text key={i} style={[styles.weekDay, { color: theme.text }]}>{d}</Text>)}
         </View>
         <FlatList
           style={{ flex: 1, alignSelf: 'stretch' }}
@@ -233,15 +220,16 @@ export const Calendar: React.FC = () => {
             >
               <View style={[
                 styles.dayCell,
-                { backgroundColor: item ? getDayColor(item) : 'transparent' },
-                item && isToday(item) ? styles.todayCell : null
+                { backgroundColor: item ? getDayColor(item) : 'transparent', borderColor: theme.border },
+                item && isToday(item) ? [styles.todayCell, { borderColor: theme.gold, backgroundColor: theme.card, shadowColor: theme.gold }] : null
               ]}>
                 {item && (symptomLogs[item.toDateString()]?.length > 0) && (
-                  <MaterialCommunityIcons name="note-outline" size={16} color="#ffd166" style={{ position: 'absolute', top: 4, right: 4 }} />
+                  <MaterialCommunityIcons name="note-outline" size={16} color={theme.gold} style={{ position: 'absolute', top: 4, right: 4 }} />
                 )}
                 <Text style={[
                   styles.dayText,
-                  item && isToday(item) ? styles.todayText : null
+                  { color: theme.text },
+                  item && isToday(item) ? [styles.todayText, { color: theme.gold }] : null
                 ]}>{item ? item.getDate() : ''}</Text>
               </View>
             </TouchableOpacity>
@@ -289,66 +277,60 @@ export const Calendar: React.FC = () => {
         weightLogs={weightLogs}
       />
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.fabBg, shadowColor: theme.fabBg }]}
         onPress={() => {
           setSelectedDay(today);
           setDayModalVisible(true);
         }}
         accessibilityLabel="Open today in Day View"
       >
-        <Text style={styles.fabText}>+</Text>
+        <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'stretch', backgroundColor: '#181a20' },
+  container: { flex: 1, alignItems: 'stretch' },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, justifyContent: 'center', marginTop: 0 },
-  headerText: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 16, color: COLORS.text, textAlign: 'center' },
-  navBtn: { fontSize: 20, padding: 8, color: COLORS.text },
+  headerText: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 16, textAlign: 'center' },
+  navBtn: { fontSize: 20, padding: 8 },
   weekRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'stretch' },
-  weekDay: { width: DAY_CELL_WIDTH, textAlign: 'center', fontWeight: 'bold', color: COLORS.text },
-  dayCell: { width: DAY_CELL_WIDTH, height: DAY_CELL_WIDTH, margin: 2, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: COLORS.default },
-  dayText: { color: COLORS.text, fontWeight: 'bold' },
+  weekDay: { width: DAY_CELL_WIDTH, textAlign: 'center', fontWeight: 'bold' },
+  dayCell: { width: DAY_CELL_WIDTH, height: DAY_CELL_WIDTH, margin: 2, alignItems: 'center', justifyContent: 'center', borderRadius: 16, borderWidth: 1 },
+  dayText: { fontWeight: 'bold' },
   todayCell: {
     borderWidth: 2,
-    borderColor: '#ffd166', // gold border for today
-    backgroundColor: '#35383f',
-    shadowColor: '#ffd166',
+    backgroundColor: undefined,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
     elevation: 4,
   },
   todayText: {
-    color: '#ffd166',
     fontWeight: 'bold',
   },
   legend: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8, justifyContent: 'center' },
   legendDot: { width: 16, height: 16, borderRadius: 8, marginHorizontal: 6 },
-  legendText: { marginRight: 16, fontSize: 16, color: COLORS.legendText, fontWeight: 'bold' },
+  legendText: { marginRight: 16, fontSize: 16, fontWeight: 'bold' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: COLORS.modalBg, padding: 20, borderRadius: 10, width: 300, alignItems: 'center' },
-  input: { borderWidth: 1, borderColor: COLORS.border, borderRadius: 5, padding: 8, marginTop: 8, width: 200, textAlign: 'center', backgroundColor: COLORS.inputBg, color: COLORS.inputText },
+  modalContent: { padding: 20, borderRadius: 10, width: 300, alignItems: 'center' },
+  input: { borderWidth: 1, borderRadius: 5, padding: 8, marginTop: 8, width: 200, textAlign: 'center' },
   fab: {
     position: 'absolute',
     right: 24,
     bottom: 32,
-    backgroundColor: '#4db8ff',
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
   fabText: {
-    color: '#181a20',
     fontSize: 36,
     fontWeight: 'bold',
     marginTop: -2,
