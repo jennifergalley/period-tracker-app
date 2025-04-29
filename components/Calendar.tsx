@@ -1,0 +1,329 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, TextInput, Button, Platform, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import DayView from './DayView';
+import ActivityLog from './ActivityLog';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { useAppState } from './AppStateContext';
+
+// Helper to get days in month
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+// Helper to get first day of week (0=Sunday)
+function getFirstDayOfWeek(year: number, month: number) {
+  return new Date(year, month, 1).getDay();
+}
+
+// Color codes for dark mode
+const COLORS = {
+  period: '#ff5c8a', // bright pink
+  fertile: '#4db8ff', // light blue
+  ovulation: '#ffb6c1', // soft pink
+  default: '#23242a', // dark gray for empty days
+  text: '#fff', // white text
+  border: '#333', // subtle border
+  modalBg: '#23242a', // modal background
+  inputBg: '#181a20', // input background
+  inputText: '#fff', // input text
+  legendText: '#bbb', // legend text
+};
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4; // 4 for margin
+
+export const Calendar: React.FC = () => {
+  const {
+    weightLogs, setWeightLogs,
+    weightUnit, setWeightUnit,
+    periodDays, setPeriodDays,
+    symptomLogs, setSymptomLogs,
+    allSymptoms, setAllSymptoms,
+  } = useAppState(); // allSymptoms: Symptom[]
+
+  const today = new Date();
+  const [month, setMonth] = useState(today.getMonth());
+  const [year, setYear] = useState(today.getFullYear());
+
+  // Compute ovulation and fertile window based on earliest period day
+  let ovulationDay: Date | null = null;
+  let fertileStart: Date | null = null;
+  let fertileEnd: Date | null = null;
+  let periodStart: Date | null = null;
+  if (periodDays.length > 0) {
+    periodStart = new Date(periodDays[0]);
+    ovulationDay = new Date(periodStart);
+    ovulationDay.setDate(ovulationDay.getDate() + 14);
+    fertileStart = new Date(ovulationDay);
+    fertileStart.setDate(fertileStart.getDate() - 6);
+    fertileEnd = new Date(ovulationDay);
+    fertileEnd.setDate(fertileEnd.getDate() + 1);
+  }
+
+  function getDayColor(date: Date) {
+    const dStr = date.toDateString();
+    if (periodDays.includes(dStr)) return COLORS.period;
+    if (ovulationDay && dStr === ovulationDay.toDateString()) return COLORS.ovulation;
+    if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) return COLORS.fertile;
+    return COLORS.default;
+  }
+
+  // Toggle period day
+  function togglePeriodDay(date: Date) {
+    const dStr = date.toDateString();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const periodDaysThisMonth = periodDays.filter(d => {
+      const dObj = new Date(d);
+      return dObj.getMonth() === month && dObj.getFullYear() === year;
+    });
+    if (!periodDays.includes(dStr)) {
+      // If this is the first period day in the month, auto-add 5 days
+      if (periodDaysThisMonth.length === 0) {
+        const newDays = Array.from({ length: 5 }, (_, i) => {
+          const newDate = new Date(date);
+          newDate.setDate(newDate.getDate() + i);
+          return newDate.toDateString();
+        });
+        setPeriodDays(prev => [...prev, ...newDays]
+          .filter((v, i, arr) => arr.indexOf(v) === i) // dedupe
+          .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+        );
+      } else {
+        setPeriodDays(prev => [...prev, dStr]
+          .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+        );
+      }
+    } else {
+      // Remove just this day
+      setPeriodDays(prev => prev.filter(d => d !== dStr));
+    }
+  }
+
+  // Navigation
+  const prevMonth = () => {
+    if (month === 0) {
+      setMonth(11);
+      setYear(y => y - 1);
+    } else {
+      setMonth(m => m - 1);
+    }
+  };
+  const nextMonth = () => {
+    if (month === 11) {
+      setMonth(0);
+      setYear(y => y + 1);
+    } else {
+      setMonth(m => m + 1);
+    }
+  };
+
+  const daysInMonth = getDaysInMonth(year, month);
+  const firstDayOfWeek = getFirstDayOfWeek(year, month);
+
+  // Build calendar grid
+  const days: (Date | null)[] = [];
+  for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
+  for (let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
+  // Build all days for log (e.g., last 60 days)
+  const logDays: Date[] = [];
+  for (let i = 0; i < 60; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    logDays.push(new Date(d));
+  }
+
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [dayModalVisible, setDayModalVisible] = useState(false);
+
+  function handleDayPress(date: Date) {
+    setSelectedDay(date);
+    setDayModalVisible(true);
+  }
+
+  // Toggle symptom for a day
+  function toggleSymptom(date: Date, symptom: string) {
+    const dStr = date.toDateString();
+    setSymptomLogs(prev => {
+      const current = prev[dStr] || [];
+      if (current.includes(symptom)) {
+        // Remove symptom
+        return { ...prev, [dStr]: current.filter(s => s !== symptom) };
+      } else {
+        // Add symptom
+        return { ...prev, [dStr]: [...current, symptom] };
+      }
+    });
+  }
+
+  // Helper to get period days in the same month as a given date
+  function getPeriodDaysThisMonth(periodDays: string[], date: Date) {
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    return periodDays.filter(d => {
+      const dObj = new Date(d);
+      return dObj.getMonth() === month && dObj.getFullYear() === year;
+    });
+  }
+
+  // When adding a symptom, add {name, icon} to allSymptoms if not present
+  // When removing, remove from allSymptoms and all symptomLogs
+  function handleAddSymptom(symptomName: string) {
+    setAllSymptoms((prev: { name: string; icon: string }[]) => prev.some((s: { name: string; icon: string }) => s.name === symptomName)
+      ? prev
+      : [...prev, { name: symptomName, icon: '📝' }]);
+  }
+  function handleRemoveSymptom(symptomName: string) {
+    setAllSymptoms((prev: { name: string; icon: string }[]) => prev.filter((s: { name: string; icon: string }) => s.name !== symptomName));
+    setSymptomLogs((prev: { [date: string]: string[] }) => {
+      const updated: { [date: string]: string[] } = {};
+      for (const date in prev) {
+        const filtered = prev[date].filter((s: string) => s !== symptomName);
+        if (filtered.length > 0) {
+          updated[date] = filtered;
+        }
+      }
+      return updated;
+    });
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={prevMonth}><Text style={styles.navBtn}>{'<'}</Text></TouchableOpacity>
+          <Text style={styles.headerText}>
+            {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
+          </Text>
+          <TouchableOpacity onPress={nextMonth}><Text style={styles.navBtn}>{'>'}</Text></TouchableOpacity>
+        </View>
+        {/* Move legend right below the month view and make text bigger */}
+        <View style={styles.legend}>
+          <View style={[styles.legendDot, { backgroundColor: COLORS.period }]} />
+          <Text style={styles.legendText}>Period</Text>
+          <View style={[styles.legendDot, { backgroundColor: COLORS.fertile }]} />
+          <Text style={styles.legendText}>Fertile Window</Text>
+          <View style={[styles.legendDot, { backgroundColor: COLORS.ovulation }]} />
+          <Text style={styles.legendText}>Ovulation</Text>
+        </View>
+        <View style={styles.weekRow}>
+          {['S','M','T','W','T','F','S'].map((d, i) => <Text key={i} style={styles.weekDay}>{d}</Text>)}
+        </View>
+        <FlatList
+          style={{ flex: 1, alignSelf: 'stretch' }}
+          contentContainerStyle={{ flexGrow: 1, alignSelf: 'stretch' }}
+          data={days}
+          numColumns={7}
+          keyExtractor={(_, i) => i.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              disabled={!item}
+              onPress={() => item && handleDayPress(item)}
+            >
+              <View style={[styles.dayCell, { backgroundColor: item ? getDayColor(item) : 'transparent' }]}> 
+                {item && (symptomLogs[item.toDateString()]?.length > 0) && (
+                  <MaterialCommunityIcons name="note-outline" size={16} color="#ffd166" style={{ position: 'absolute', top: 4, right: 4 }} />
+                )}
+                <Text style={styles.dayText}>{item ? item.getDate() : ''}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          scrollEnabled={false}
+        />
+        <Modal visible={dayModalVisible} transparent animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity style={{ flex: 1, width: '100%', justifyContent: 'center' }} activeOpacity={1} onPress={() => setDayModalVisible(false)}>
+              <View style={[styles.modalContent, { width: 320, alignSelf: 'center' }]}> 
+                {selectedDay && (
+                  <DayView
+                    date={selectedDay}
+                    isPeriod={periodDays.includes(selectedDay.toDateString())}
+                    isFertile={!!(fertileStart && fertileEnd && selectedDay >= fertileStart && selectedDay <= fertileEnd)}
+                    isOvulation={!!(ovulationDay && selectedDay.toDateString() === ovulationDay.toDateString())}
+                    onTogglePeriod={togglePeriodDay}
+                    symptoms={symptomLogs[selectedDay.toDateString()] || []}
+                    onToggleSymptom={toggleSymptom}
+                    symptomList={allSymptoms}
+                    onAddSymptom={handleAddSymptom}
+                    onRemoveSymptom={handleRemoveSymptom}
+                    periodDaysThisMonth={getPeriodDaysThisMonth(periodDays, selectedDay)}
+                    weightLog={weightLogs[selectedDay.toDateString()]}
+                    onLogWeight={(value: number, unit: 'kg' | 'lbs') => {
+                      setWeightLogs(prev => ({ ...prev, [selectedDay.toDateString()]: { value, unit } }));
+                    }}
+                    weightUnit={weightUnit}
+                    onToggleWeightUnit={() => setWeightUnit(weightUnit === 'kg' ? 'lbs' : 'kg')}
+                  />
+                )}
+                <Button title="Close" onPress={() => setDayModalVisible(false)} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </SafeAreaView>
+      <ActivityLog
+        days={logDays}
+        periodDays={periodDays}
+        ovulationDay={ovulationDay}
+        fertileStart={fertileStart}
+        fertileEnd={fertileEnd}
+        symptomLogs={symptomLogs}
+        weightLogs={weightLogs}
+      />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => {
+          setSelectedDay(today);
+          setDayModalVisible(true);
+        }}
+        accessibilityLabel="Open today in Day View"
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, alignItems: 'stretch', backgroundColor: '#181a20' },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, justifyContent: 'center', marginTop: 0 },
+  headerText: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 16, color: COLORS.text, textAlign: 'center' },
+  navBtn: { fontSize: 20, padding: 8, color: COLORS.text },
+  weekRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'stretch' },
+  weekDay: { width: DAY_CELL_WIDTH, textAlign: 'center', fontWeight: 'bold', color: COLORS.text },
+  dayCell: { width: DAY_CELL_WIDTH, height: DAY_CELL_WIDTH, margin: 2, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: COLORS.default },
+  dayText: { color: COLORS.text, fontWeight: 'bold' },
+  legend: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8, justifyContent: 'center' },
+  legendDot: { width: 16, height: 16, borderRadius: 8, marginHorizontal: 6 },
+  legendText: { marginRight: 16, fontSize: 16, color: COLORS.legendText, fontWeight: 'bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: COLORS.modalBg, padding: 20, borderRadius: 10, width: 300, alignItems: 'center' },
+  input: { borderWidth: 1, borderColor: COLORS.border, borderRadius: 5, padding: 8, marginTop: 8, width: 200, textAlign: 'center', backgroundColor: COLORS.inputBg, color: COLORS.inputText },
+  fab: {
+    position: 'absolute',
+    right: 24,
+    bottom: 32,
+    backgroundColor: '#4db8ff',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  fabText: {
+    color: '#181a20',
+    fontSize: 36,
+    fontWeight: 'bold',
+    marginTop: -2,
+  },
+});
+
+export default Calendar;
