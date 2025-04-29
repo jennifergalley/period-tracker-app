@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { DEFAULT_SYMPTOMS } from '../features/symptoms/symptomUtils';
+import * as FileSystem from 'expo-file-system';
 
 // Types
 export type WeightUnit = 'kg' | 'lbs';
@@ -24,12 +25,37 @@ export interface AppState {
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
 
+const DATA_FILE = FileSystem.documentDirectory + 'appState.json';
+
 export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [weightLogs, setWeightLogs] = useState<{ [date: string]: WeightLog }>({});
-  const [weightUnit, setWeightUnit] = useState<WeightUnit>('kg');
+  const [weightUnit, setWeightUnit] = useState<WeightUnit>('lbs');
   const [periodDays, setPeriodDays] = useState<string[]>([]);
   const [symptomLogs, setSymptomLogs] = useState<{ [date: string]: string[] }>({});
   const [allSymptoms, setAllSymptoms] = useState(DEFAULT_SYMPTOMS);
+
+  // Load state from file on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const file = await FileSystem.readAsStringAsync(DATA_FILE);
+        const data = JSON.parse(file);
+        if (data.weightLogs) setWeightLogs(data.weightLogs);
+        if (data.weightUnit) setWeightUnit(data.weightUnit);
+        if (data.periodDays) setPeriodDays(data.periodDays);
+        if (data.symptomLogs) setSymptomLogs(data.symptomLogs);
+        if (data.allSymptoms) setAllSymptoms(data.allSymptoms);
+      } catch (e) {
+        // File may not exist on first run; that's OK
+      }
+    })();
+  }, []);
+
+  // Save state to file whenever any part changes
+  useEffect(() => {
+    const data = { weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms };
+    FileSystem.writeAsStringAsync(DATA_FILE, JSON.stringify(data));
+  }, [weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms]);
 
   return (
     <AppStateContext.Provider value={{

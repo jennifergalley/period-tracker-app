@@ -6,6 +6,7 @@ import ActivityLog from './ActivityLog';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useAppState } from './AppStateContext';
+import { startOfDay } from 'date-fns';
 
 // Helper to get days in month
 function getDaysInMonth(year: number, month: number) {
@@ -33,6 +34,7 @@ const COLORS = {
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4; // 4 for margin
+const TODAY = startOfDay(new Date());
 
 export const Calendar: React.FC = () => {
   const {
@@ -189,6 +191,12 @@ export const Calendar: React.FC = () => {
     });
   }
 
+  // Helper to check if a date is today
+  function isToday(date: Date) {
+    const d = startOfDay(date);
+    return d.getTime() === TODAY.getTime();
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: '#181a20' }}>
       <StatusBar style="light" />
@@ -223,11 +231,18 @@ export const Calendar: React.FC = () => {
               disabled={!item}
               onPress={() => item && handleDayPress(item)}
             >
-              <View style={[styles.dayCell, { backgroundColor: item ? getDayColor(item) : 'transparent' }]}> 
+              <View style={[
+                styles.dayCell,
+                { backgroundColor: item ? getDayColor(item) : 'transparent' },
+                item && isToday(item) ? styles.todayCell : null
+              ]}>
                 {item && (symptomLogs[item.toDateString()]?.length > 0) && (
                   <MaterialCommunityIcons name="note-outline" size={16} color="#ffd166" style={{ position: 'absolute', top: 4, right: 4 }} />
                 )}
-                <Text style={styles.dayText}>{item ? item.getDate() : ''}</Text>
+                <Text style={[
+                  styles.dayText,
+                  item && isToday(item) ? styles.todayText : null
+                ]}>{item ? item.getDate() : ''}</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -296,6 +311,20 @@ const styles = StyleSheet.create({
   weekDay: { width: DAY_CELL_WIDTH, textAlign: 'center', fontWeight: 'bold', color: COLORS.text },
   dayCell: { width: DAY_CELL_WIDTH, height: DAY_CELL_WIDTH, margin: 2, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: COLORS.default },
   dayText: { color: COLORS.text, fontWeight: 'bold' },
+  todayCell: {
+    borderWidth: 2,
+    borderColor: '#ffd166', // gold border for today
+    backgroundColor: '#35383f',
+    shadowColor: '#ffd166',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  todayText: {
+    color: '#ffd166',
+    fontWeight: 'bold',
+  },
   legend: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8, justifyContent: 'center' },
   legendDot: { width: 16, height: 16, borderRadius: 8, marginHorizontal: 6 },
   legendText: { marginRight: 16, fontSize: 16, color: COLORS.legendText, fontWeight: 'bold' },
