@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import DayView from './DayView';
 import { useAppState } from './AppStateContext';
 import { calculateCycleInfo, getPeriodDaysThisMonth } from '../features/period/cycleUtils';
-import { useTheme } from './theme';
+import { useTheme } from './Theme';
 import { startOfDay } from 'date-fns';
 
 const Home: React.FC = () => {

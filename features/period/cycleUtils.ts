@@ -10,9 +10,8 @@ export function calculateCycleInfo(periodDays: string[]) {
     ovulationDay = new Date(periodStart);
     ovulationDay.setDate(ovulationDay.getDate() + 14);
     fertileStart = new Date(ovulationDay);
-    fertileStart.setDate(fertileStart.getDate() - 6);
+    fertileStart.setDate(fertileStart.getDate() - 5);
     fertileEnd = new Date(ovulationDay);
-    fertileEnd.setDate(fertileEnd.getDate() + 1);
   }
   return { periodStart, ovulationDay, fertileStart, fertileEnd };
 }

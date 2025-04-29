@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Keyboard } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from './theme';
+import { useTheme } from './Theme';
 
 interface DayViewProps {
   date: Date;

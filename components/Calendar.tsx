@@ -7,7 +7,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useAppState } from './AppStateContext';
 import { startOfDay } from 'date-fns';
-import { useTheme } from './theme';
+import { useTheme } from './Theme';
+import { calculateCycleInfo } from '../features/period/cycleUtils';
 
 // Helper to get days in month
 function getDaysInMonth(year: number, month: number) {
@@ -37,20 +38,8 @@ export const Calendar: React.FC = () => {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
 
-  // Compute ovulation and fertile window based on earliest period day
-  let ovulationDay: Date | null = null;
-  let fertileStart: Date | null = null;
-  let fertileEnd: Date | null = null;
-  let periodStart: Date | null = null;
-  if (periodDays.length > 0) {
-    periodStart = new Date(periodDays[0]);
-    ovulationDay = new Date(periodStart);
-    ovulationDay.setDate(ovulationDay.getDate() + 14);
-    fertileStart = new Date(ovulationDay);
-    fertileStart.setDate(fertileStart.getDate() - 6);
-    fertileEnd = new Date(ovulationDay);
-    fertileEnd.setDate(fertileEnd.getDate() + 1);
-  }
+  // Use utility function for cycle info
+  const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);
 
   function getDayColor(date: Date) {
     const dStr = date.toDateString();

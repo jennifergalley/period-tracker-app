@@ -6,7 +6,7 @@ import { format, subMonths } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppState } from './AppStateContext';
 import { filterAndSortWeightLogs, prepareWeightChartData, addOrUpdateWeightLog, deleteWeightLog } from '../features/weight/weightUtils';
-import { useTheme } from './theme';
+import { useTheme } from './Theme';
 
 const chartConfig = {
   propsForDots: { r: '4', strokeWidth: '2' },

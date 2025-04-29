@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme } from './theme';
+import { useTheme } from './Theme';
 import { DEFAULT_SYMPTOMS } from '../features/symptoms/symptomUtils';
 
 interface ActivityLogProps {

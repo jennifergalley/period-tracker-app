@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal } from 'react-native';
 import { useAppState } from './AppStateContext';
-import { useTheme } from './theme';
+import { useTheme } from './Theme';
 import * as FileSystem from 'expo-file-system';
 import { DEFAULT_SYMPTOMS } from '../features/symptoms/symptomUtils';
 

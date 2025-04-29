@@ -7,7 +7,7 @@ import Calendar from './components/Calendar';
 import Home from './components/Home';
 import { AppStateProvider } from './components/AppStateContext';
 import Settings from './components/Settings';
-import { ThemeProvider, useTheme } from './components/theme';
+import { ThemeProvider, useTheme } from './components/Theme';
 
 const Drawer = createDrawerNavigator();
 
