@@ -55,11 +55,14 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
 
   return (
     <>
+      {/* --- Main Day View Scrollable Content --- */}
       <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}> 
+        {/* --- Date and Cycle Status --- */}
         <Text style={[styles.date, { color: theme.text }]}>{date.toDateString()}</Text>
         {isPeriod && <Text style={[styles.period, { color: theme.period }]}>Period Day</Text>}
         {isFertile && <Text style={[styles.fertile, { color: theme.fertile }]}>Fertile Window</Text>}
         {isOvulation && <Text style={[styles.ovulation, { color: theme.ovulation }]}>Ovulation Day</Text>}
+        {/* --- Log Period Button --- */}
         <TouchableOpacity
           style={[styles.weightSaveBtn, { backgroundColor: theme.accent }]}
           onPress={() => onTogglePeriod(date)}
@@ -72,6 +75,7 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
                 : 'Log Period'}
           </Text>
         </TouchableOpacity>
+        {/* --- Symptom Logging Section --- */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }} onPress={() => setShowSymptoms(s => !s)}>
           <Text style={[styles.symptomHeader, { color: theme.text }]}>Log Symptoms</Text>
           <Text style={{ color: theme.accent, fontSize: 18 }}>{showSymptoms ? '▲' : '▼'}</Text>
@@ -142,6 +146,7 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
             </TouchableOpacity>
           </View>
         )}
+        {/* --- Weight Logging Section --- */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowWeight(s => !s)}>
           <Text style={[styles.weightHeader, { color: theme.text }]}>Log Weight</Text>
           <Text style={{ color: theme.period, fontSize: 18 }}>{showWeight ? '▲' : '▼'}</Text>
@@ -177,7 +182,7 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
           <Text style={[styles.weightLoggedText, { color: theme.text }]}>Logged: {weightLog.value} {weightLog.unit}</Text>
         )}
       </ScrollView>
-      {/* Emoji Picker Modal at root level */}
+      {/* --- Emoji Picker Modal (for custom symptom) --- */}
       <Modal
         visible={emojiPickerVisible}
         transparent

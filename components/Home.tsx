@@ -20,7 +20,8 @@ const Home: React.FC = () => {
   const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}> 
+      {/* --- Day View for Today (Main Home UI) --- */}
       <DayView
         date={today}
         isPeriod={periodDays.includes(today.toDateString())}

@@ -16,7 +16,6 @@ export const themes = {
     inputBg: '#23242a',
     inputText: '#fff',
     legendText: '#bbb',
-    fabBg: '#4db8ff',
     fabText: '#181a20',
     modalBg: '#23242a',
     borderWidth: 1,
@@ -35,7 +34,6 @@ export const themes = {
     inputBg: '#f3f3f6', // subtle grey background for text inputs
     inputText: '#181a20',
     legendText: '#555',
-    fabBg: '#007aff',
     fabText: '#fff',
     modalBg: '#f5f5f5',
     borderWidth: 1,

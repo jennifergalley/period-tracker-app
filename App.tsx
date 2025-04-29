@@ -14,8 +14,10 @@ const Drawer = createDrawerNavigator();
 function AppWithTheme() {
   const { theme } = useTheme();
   return (
+    // --- App Navigation Container ---
     <AppStateProvider>
       <NavigationContainer>
+        {/* --- Drawer Navigation (Sidebar + Top Bar) --- */}
         <Drawer.Navigator
           initialRouteName="Home"
           screenOptions={{
@@ -27,6 +29,7 @@ function AppWithTheme() {
             drawerLabelStyle: { fontWeight: 'bold' },
           }}
         >
+          {/* --- Main Screens --- */}
           <Drawer.Screen name="Home">
             {() => <Home />}
           </Drawer.Screen>

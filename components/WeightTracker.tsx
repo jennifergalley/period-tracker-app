@@ -58,7 +58,9 @@ const WeightTracker: React.FC = () => {
   // Remove weight entry row from top, add Log Weight button
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}> 
+      {/* --- Weight Tracker Header --- */}
       <Text style={[styles.heading, { color: theme.text }]}>Weight Tracker</Text>
+      {/* --- Log Weight Modal --- */}
       <Modal visible={showWeightModal} transparent animationType="slide" onRequestClose={() => setShowWeightModal(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowWeightModal(false)}>
           <View style={[styles.modalContent, { backgroundColor: theme.modalBg }]} onStartShouldSetResponder={() => true}>
@@ -152,6 +154,7 @@ const WeightTracker: React.FC = () => {
           </View>
         </TouchableOpacity>
       </Modal>
+      {/* --- Date Range Selection Row --- */}
       <View style={styles.rangeRow}>
         {dateRanges.map(range => (
           <TouchableOpacity key={range.label} onPress={() => { setSelectedRange(range); setCustomRange(null); }}>
@@ -162,10 +165,10 @@ const WeightTracker: React.FC = () => {
                   styles.rangeBtnSelected,
                   {
                     backgroundColor: theme.accent,
-                    color: theme.background, // Use background color for high contrast
+                    color: theme.text,
                   },
                 ],
-                { color: theme.legendText },
+                { color: theme.text },
               ]}
             >
               {range.label}
@@ -173,6 +176,7 @@ const WeightTracker: React.FC = () => {
           </TouchableOpacity>
         ))}
       </View>
+      {/* --- Weight Chart and Log List --- */}
       <ScrollView>
         <LineChart
           data={chartData}
@@ -190,7 +194,7 @@ const WeightTracker: React.FC = () => {
           style={{ ...styles.chart, borderRadius: 12 }}
         />
         <Text style={[styles.logHeading, { color: theme.text }]}>Weight Log</Text>
-        {logEntries.length === 0 && <Text style={[styles.noData, { color: theme.legendText }]}>No weight logs in this range.</Text>}
+        {logEntries.length === 0 && <Text style={[styles.noData, { color: theme.text }]}>No weight logs in this range.</Text>}
         {logEntries.slice().reverse().map(entry => (
           <TouchableOpacity
             key={entry.date.toISOString()}
@@ -207,8 +211,9 @@ const WeightTracker: React.FC = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      {/* --- Floating Action Button to Add Weight Log --- */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.fabBg, shadowColor: theme.fabBg }]}
+        style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
         onPress={() => {
           setLogDate(today);
           setOriginalLogDate(null); // New entry

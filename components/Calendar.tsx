@@ -186,9 +186,11 @@ export const Calendar: React.FC = () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background }}>
+    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
+      {/* --- Calendar Month View UI --- */}
       <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['left', 'right', 'bottom']}>
+        {/* --- Calendar Header (Month/Year, Navigation) --- */}
         <View style={styles.header}>
           <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
           <Text style={[styles.headerText, { color: theme.text }]}>
@@ -196,6 +198,7 @@ export const Calendar: React.FC = () => {
           </Text>
           <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
         </View>
+        {/* --- Calendar Legend --- */}
         <View style={styles.legend}>
           <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
           <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
@@ -204,9 +207,11 @@ export const Calendar: React.FC = () => {
           <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
           <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
         </View>
+        {/* --- Weekday Row --- */}
         <View style={styles.weekRow}>
           {['S','M','T','W','T','F','S'].map((d, i) => <Text key={i} style={[styles.weekDay, { color: theme.text }]}>{d}</Text>)}
         </View>
+        {/* --- Calendar Grid (Days) --- */}
         <FlatList
           style={{ flex: 1, alignSelf: 'stretch' }}
           contentContainerStyle={{ flexGrow: 1, alignSelf: 'stretch' }}
@@ -236,37 +241,35 @@ export const Calendar: React.FC = () => {
           )}
           scrollEnabled={false}
         />
-        <Modal visible={dayModalVisible} transparent animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableOpacity style={{ flex: 1, width: '100%', justifyContent: 'center' }} activeOpacity={1} onPress={() => setDayModalVisible(false)}>
-              <View style={[styles.modalContent, { width: 320, alignSelf: 'center' }]}> 
-                {selectedDay && (
-                  <DayView
-                    date={selectedDay}
-                    isPeriod={periodDays.includes(selectedDay.toDateString())}
-                    isFertile={!!(fertileStart && fertileEnd && selectedDay >= fertileStart && selectedDay <= fertileEnd)}
-                    isOvulation={!!(ovulationDay && selectedDay.toDateString() === ovulationDay.toDateString())}
-                    onTogglePeriod={togglePeriodDay}
-                    symptoms={symptomLogs[selectedDay.toDateString()] || []}
-                    onToggleSymptom={toggleSymptom}
-                    symptomList={allSymptoms}
-                    onAddSymptom={handleAddSymptom}
-                    onRemoveSymptom={handleRemoveSymptom}
-                    periodDaysThisMonth={getPeriodDaysThisMonth(periodDays, selectedDay)}
-                    weightLog={weightLogs[selectedDay.toDateString()]}
-                    onLogWeight={(value: number, unit: 'kg' | 'lbs') => {
-                      setWeightLogs(prev => ({ ...prev, [selectedDay.toDateString()]: { value, unit } }));
-                    }}
-                    weightUnit={weightUnit}
-                    onToggleWeightUnit={() => setWeightUnit(weightUnit === 'kg' ? 'lbs' : 'kg')}
-                  />
-                )}
-                <Button title="Close" onPress={() => setDayModalVisible(false)} />
-              </View>
-            </TouchableOpacity>
+        {/* --- Day Modal (DayView) --- */}
+        <Modal visible={dayModalVisible} transparent={false} animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
+          <View style={{ flex: 1, backgroundColor: theme.background }}>
+            {selectedDay && (
+              <DayView
+                date={selectedDay}
+                isPeriod={periodDays.includes(selectedDay.toDateString())}
+                isFertile={!!(fertileStart && fertileEnd && selectedDay >= fertileStart && selectedDay <= fertileEnd)}
+                isOvulation={!!(ovulationDay && selectedDay.toDateString() === ovulationDay.toDateString())}
+                onTogglePeriod={togglePeriodDay}
+                symptoms={symptomLogs[selectedDay.toDateString()] || []}
+                onToggleSymptom={toggleSymptom}
+                symptomList={allSymptoms}
+                onAddSymptom={handleAddSymptom}
+                onRemoveSymptom={handleRemoveSymptom}
+                periodDaysThisMonth={getPeriodDaysThisMonth(periodDays, selectedDay)}
+                weightLog={weightLogs[selectedDay.toDateString()]}
+                onLogWeight={(value: number, unit: 'kg' | 'lbs') => {
+                  setWeightLogs(prev => ({ ...prev, [selectedDay.toDateString()]: { value, unit } }));
+                }}
+                weightUnit={weightUnit}
+                onToggleWeightUnit={() => setWeightUnit(weightUnit === 'kg' ? 'lbs' : 'kg')}
+              />
+            )}
+            <Button title="Close" onPress={() => setDayModalVisible(false)} />
           </View>
         </Modal>
       </SafeAreaView>
+      {/* --- Activity Log Below Calendar --- */}
       <ActivityLog
         days={logDays}
         periodDays={periodDays}
@@ -276,8 +279,9 @@ export const Calendar: React.FC = () => {
         symptomLogs={symptomLogs}
         weightLogs={weightLogs}
       />
+      {/* --- Floating Action Button for Today --- */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.fabBg, shadowColor: theme.fabBg }]}
+        style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
         onPress={() => {
           setSelectedDay(today);
           setDayModalVisible(true);
