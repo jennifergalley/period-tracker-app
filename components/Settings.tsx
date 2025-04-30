@@ -10,7 +10,7 @@ const EMOJI_OPTIONS = Array.from(new Set([
 ]));
 
 const Settings: React.FC = () => {
-  const { weightUnit, setWeightUnit, setWeightLogs, setPeriodDays, setSymptomLogs, setAllSymptoms, autoAddPeriodDays, setAutoAddPeriodDays, periodAutoLogLength, setPeriodAutoLogLength } = useAppState();
+  const { weightUnit, setWeightUnit, setWeightLogs, setPeriodDays, setSymptomLogs, setAllSymptoms, autoAddPeriodDays, setAutoAddPeriodDays, periodAutoLogLength, setPeriodAutoLogLength, showOvulation, setShowOvulation, showFertileWindow, setShowFertileWindow } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
@@ -25,9 +25,9 @@ const Settings: React.FC = () => {
   }, [showSymptomAdded]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background, alignItems: 'center', justifyContent: 'center' }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.background }}>
       {/* --- Settings Header --- */}
-      <Text style={{ color: theme.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16 }}>Settings</Text>
+      <Text style={{ color: theme.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16, marginTop: 10 }}>Settings</Text>
       {/* --- Weight Unit Selection --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Preferred Unit</Text>
       <View style={{ flexDirection: 'row', marginTop: 16 }}>
@@ -155,7 +155,7 @@ const Settings: React.FC = () => {
       {autoAddPeriodDays && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
           <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>
-            Number of days to auto-log:
+            Typical period length (days):
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Pressable
@@ -174,13 +174,33 @@ const Settings: React.FC = () => {
           </View>
         </View>
       )}
+      {/* --- Ovulation and Fertile Window Toggles --- */}
+      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Calendar Settings</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+        <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Show Ovulation Day</Text>
+        <Switch
+          value={showOvulation}
+          onValueChange={setShowOvulation}
+          trackColor={{ false: theme.border, true: theme.accent }}
+          thumbColor={showOvulation ? theme.fabText : theme.card}
+        />
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+        <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Show Fertile Window</Text>
+        <Switch
+          value={showFertileWindow}
+          onValueChange={setShowFertileWindow}
+          trackColor={{ false: theme.border, true: theme.accent }}
+          thumbColor={showFertileWindow ? theme.fabText : theme.card}
+        />
+      </View>
       {/* --- Delete All Data Button --- */}
       <TouchableOpacity
         style={{ marginTop: 32, backgroundColor: theme.error, borderRadius: 8, padding: 14, alignSelf: 'stretch', marginHorizontal: 24 }}
         onPress={async () => {
           Alert.alert(
-            'Delete All App Data',
-            'Are you sure you want to delete all app data? This action is NOT reversible.',
+            'Delete All Logs',
+            'Are you sure you want to delete all your logged data? This action is NOT reversible.',
             [
               { text: 'Cancel', style: 'cancel' },
               {
@@ -200,9 +220,9 @@ const Settings: React.FC = () => {
           );
         }}
       >
-        <Text style={{ color: theme.background, fontWeight: 'bold', textAlign: 'center' }}>Delete All App Data</Text>
+        <Text style={{ color: theme.background, fontWeight: 'bold', textAlign: 'center' }}>Delete All Logs</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 

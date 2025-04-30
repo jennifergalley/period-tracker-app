@@ -25,6 +25,10 @@ export interface AppState {
   setAutoAddPeriodDays: React.Dispatch<React.SetStateAction<boolean>>;
   periodAutoLogLength: number;
   setPeriodAutoLogLength: React.Dispatch<React.SetStateAction<number>>;
+  showOvulation: boolean;
+  setShowOvulation: React.Dispatch<React.SetStateAction<boolean>>;
+  showFertileWindow: boolean;
+  setShowFertileWindow: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -39,6 +43,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [allSymptoms, setAllSymptoms] = useState(DEFAULT_SYMPTOMS);
   const [autoAddPeriodDays, setAutoAddPeriodDays] = useState<boolean>(true);
   const [periodAutoLogLength, setPeriodAutoLogLength] = useState<number>(5);
+  const [showOvulation, setShowOvulation] = useState<boolean>(true);
+  const [showFertileWindow, setShowFertileWindow] = useState<boolean>(true);
 
   // Load state from file on mount
   useEffect(() => {
@@ -53,6 +59,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (data.allSymptoms) setAllSymptoms(data.allSymptoms);
         if (typeof data.autoAddPeriodDays === 'boolean') setAutoAddPeriodDays(data.autoAddPeriodDays);
         if (typeof data.periodAutoLogLength === 'number') setPeriodAutoLogLength(data.periodAutoLogLength);
+        if (typeof data.showOvulation === 'boolean') setShowOvulation(data.showOvulation);
+        if (typeof data.showFertileWindow === 'boolean') setShowFertileWindow(data.showFertileWindow);
       } catch (e) {
         // File may not exist on first run; that's OK
       }
@@ -61,9 +69,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Save state to file whenever any part changes
   useEffect(() => {
-    const data = { weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength };
+    const data = { weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength, showOvulation, showFertileWindow };
     FileSystem.writeAsStringAsync(DATA_FILE, JSON.stringify(data));
-  }, [weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength]);
+  }, [weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength, showOvulation, showFertileWindow]);
 
   return (
     <AppStateContext.Provider value={{
@@ -74,6 +82,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       allSymptoms, setAllSymptoms,
       autoAddPeriodDays, setAutoAddPeriodDays,
       periodAutoLogLength, setPeriodAutoLogLength,
+      showOvulation, setShowOvulation,
+      showFertileWindow, setShowFertileWindow,
     }}>
       {children}
     </AppStateContext.Provider>

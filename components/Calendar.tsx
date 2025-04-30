@@ -32,7 +32,8 @@ export const Calendar: React.FC = () => {
     periodDays, setPeriodDays,
     symptomLogs, setSymptomLogs,
     allSymptoms, setAllSymptoms,
-    autoAddPeriodDays, periodAutoLogLength
+    autoAddPeriodDays, periodAutoLogLength,
+    showOvulation, showFertileWindow,
   } = useAppState(); // allSymptoms: Symptom[]
 
   const today = new Date();
@@ -41,12 +42,16 @@ export const Calendar: React.FC = () => {
 
   // Use utility function for cycle info
   const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);
+  // Conditionally use ovulation/fertile window based on settings
+  const ovulationDayToShow = showOvulation ? ovulationDay : null;
+  const fertileStartToShow = showFertileWindow ? fertileStart : null;
+  const fertileEndToShow = showFertileWindow ? fertileEnd : null;
 
   function getDayColor(date: Date) {
     const dStr = date.toDateString();
     if (periodDays.includes(dStr)) return theme.period;
-    if (ovulationDay && dStr === ovulationDay.toDateString()) return theme.ovulation;
-    if (fertileStart && fertileEnd && date >= fertileStart && date <= fertileEnd) return theme.fertile;
+    if (ovulationDayToShow && dStr === ovulationDayToShow.toDateString()) return theme.ovulation;
+    if (fertileStartToShow && fertileEndToShow && date >= fertileStartToShow && date <= fertileEndToShow) return theme.fertile;
     return theme.card;
   }
 
@@ -190,10 +195,18 @@ export const Calendar: React.FC = () => {
         <View style={styles.legend}>
           <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
           <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
-          <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
-          <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
-          <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
-          <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
+          {showFertileWindow && (
+            <>
+              <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
+            </>
+          )}
+          {showOvulation && (
+            <>
+              <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
+            </>
+          )}
         </View>
         {/* --- Weekday Row --- */}
         <View style={styles.weekRow}>
@@ -236,8 +249,8 @@ export const Calendar: React.FC = () => {
               <DayView
                 date={selectedDay}
                 isPeriod={periodDays.includes(selectedDay.toDateString())}
-                isFertile={!!(fertileStart && fertileEnd && selectedDay >= fertileStart && selectedDay <= fertileEnd)}
-                isOvulation={!!(ovulationDay && selectedDay.toDateString() === ovulationDay.toDateString())}
+                isFertile={!!(fertileStartToShow && fertileEndToShow && selectedDay >= fertileStartToShow && selectedDay <= fertileEndToShow)}
+                isOvulation={!!(ovulationDayToShow && selectedDay.toDateString() === ovulationDayToShow.toDateString())}
                 onTogglePeriod={togglePeriodDay}
                 symptoms={symptomLogs[selectedDay.toDateString()] || []}
                 onToggleSymptom={toggleSymptom}
@@ -261,9 +274,9 @@ export const Calendar: React.FC = () => {
       <ActivityLog
         days={logDays}
         periodDays={periodDays}
-        ovulationDay={ovulationDay}
-        fertileStart={fertileStart}
-        fertileEnd={fertileEnd}
+        ovulationDay={ovulationDayToShow}
+        fertileStart={fertileStartToShow}
+        fertileEnd={fertileEndToShow}
         symptomLogs={symptomLogs}
         weightLogs={weightLogs}
       />
