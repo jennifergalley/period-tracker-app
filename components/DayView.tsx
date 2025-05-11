@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Keyboard } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from './Theme';
-import { useAppState } from './AppStateContext';
+import { useTheme } from '@/components/Theme';
+import { useAppState } from '@/components/AppStateContext';
 
-interface DayViewProps {
+type DayViewProps = {
   date: Date;
   isPeriod: boolean;
   isFertile: boolean;
@@ -22,21 +22,19 @@ interface DayViewProps {
   onToggleWeightUnit: () => void;
 }
 
-const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) => {
+export default function DayView(props: DayViewProps) {
   const { theme } = useTheme();
   const {
     date, isPeriod, isFertile, isOvulation, onTogglePeriod,
-    periodDaysThisMonth, weightLog, onLogWeight, 
+    weightLog, onLogWeight, 
   } = props;
     const {
       weightUnit,
-      autoAddPeriodDays,
-      periodAutoLogLength
     } = useAppState();
 
-  const [showSymptoms, setShowSymptoms] = useState(false);
+  const [showSymptoms, setShowSymptoms] = useState(true);
   const [weightInput, setWeightInput] = useState(weightLog ? String(weightLog.value) : '');
-  const [showWeight, setShowWeight] = useState(false);
+  const [showWeight, setShowWeight] = useState(true);
   const weightInputRef = useRef<TextInput>(null);
 
   // Update input if user switches days
@@ -52,12 +50,14 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
   return (
     <>
       {/* --- Main Day View Scrollable Content --- */}
-      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}> 
+      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
+        
         {/* --- Date and Cycle Status --- */}
         <Text style={[styles.date, { color: theme.text }]}>{date.toDateString()}</Text>
         {isPeriod && <Text style={[styles.period, { color: theme.period }]}>Period Day</Text>}
         {isFertile && <Text style={[styles.fertile, { color: theme.fertile }]}>Fertile Window</Text>}
         {isOvulation && <Text style={[styles.ovulation, { color: theme.ovulation }]}>Ovulation Day</Text>}
+
         {/* --- Log Period Button --- */}
         <TouchableOpacity
           style={[styles.weightSaveBtn, { backgroundColor: theme.accent }]}
@@ -69,17 +69,20 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
               : 'Log Period'}
           </Text>
         </TouchableOpacity>
+
         {/* --- Symptom Logging Section --- */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }} onPress={() => setShowSymptoms(s => !s)}>
           <Text style={[styles.symptomHeader, { color: theme.text }]}>Log Symptoms</Text>
           <Text style={{ color: theme.accent, fontSize: 18 }}>{showSymptoms ? '▲' : '▼'}</Text>
         </TouchableOpacity>
+
         {showSymptoms && (
           <View style={styles.symptomListVertical}>
-            {symptomList.map(symptom => (
+            {props.symptomList.map(symptom => (
               <TouchableOpacity
                 key={symptom.name}
-                style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border }, symptoms.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]}
+                style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border }, 
+                  props.symptoms.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]}
                 onPress={() => props.onToggleSymptom(date, symptom.name)}
                 onLongPress={() => {
                   triggerHaptic();
@@ -94,16 +97,18 @@ const DayView: React.FC<DayViewProps> = ({ symptomList, symptoms, ...props }) =>
                 }}
               >
                 <Text style={styles.symptomEmoji}>{symptom.icon || '📝'}</Text>
-                <Text style={[styles.symptomTextVertical, { color: theme.text }, symptoms.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
+                <Text style={[styles.symptomTextVertical, { color: theme.text }, props.symptoms.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
         )}
+
         {/* --- Weight Logging Section --- */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowWeight(s => !s)}>
           <Text style={[styles.weightHeader, { color: theme.text }]}>Log Weight</Text>
           <Text style={{ color: theme.period, fontSize: 18 }}>{showWeight ? '▲' : '▼'}</Text>
         </TouchableOpacity>
+
         {showWeight && (
           <View style={styles.weightRow}>
             <TextInput
@@ -163,5 +168,3 @@ const styles = StyleSheet.create({
   weightSaveBtnText: { fontWeight: 'bold', fontSize: 15 },
   weightLoggedText: { fontSize: 14, marginTop: 2 },
 });
-
-export default DayView;

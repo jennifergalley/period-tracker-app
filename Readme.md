@@ -20,9 +20,69 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 
 ## Development Notes
 
-_This app was created entirely with the help of AI._
+_AI USE DISCLAIMER: This app was created entirely with the help of AI._
 
-For local hosting / testing:
+### For local hosting / testing:
 
 1. Command to start the expo server: `npx expo start`. Make sure to run in this directory.
 2. Open the Expo Go app on phone and scan the QR code. Make sure your PC and phone are on the same Wifi network (no ethernet).
+
+Clean and rebuild the project:
+```
+npx expo prebuild
+npx expo run:android
+```
+
+Tip: Sometimes, running your app in production mode locally will show errors that normally wouldn't be thrown. You can run the app locally in production by running `npx expo start --no-dev --minify`. `--no-dev` tells the server not to be run in development mode, and `--minify` is used to minify your code the same way it is for production JavaScript bundles.
+
+
+### Installing the apk from Expo:
+To install your React Native (Expo) app as an APK on your Android phone, follow these steps:
+
+#### 1. Build the APK
+
+If you are using **Expo Managed Workflow**:
+
+1. **Install EAS CLI** (if you haven't):
+   ```
+   npm install -g eas-cli
+   ```
+
+2. **Login to Expo**:
+   ```
+   eas login
+   ```
+
+3. **Configure EAS Build** (if you haven't):
+   ```
+   eas build:configure
+   ```
+
+4. **Start the build for Android APK**:
+   ```
+   eas build --platform android --profile preview
+   ```
+   - For a production build, use `--profile production`.
+
+5. Wait for the build to finish. You’ll get a link in the terminal or on the [Expo build dashboard](https://expo.dev/accounts/your-username/projects/your-project/builds).
+
+
+---
+
+#### 2. Download the APK
+
+- Once the build is complete, download the `.apk` file from the Expo dashboard or the link provided in your terminal.
+
+---
+
+#### 3. Install the APK on Your Phone
+
+1. **Transfer the APK** to your phone (via USB, email, Google Drive, etc.).
+2. On your phone, **open the APK file**.
+3. If prompted, allow installation from unknown sources.
+4. Follow the prompts to install the app.
+
+---
+
+**Note:**  
+If you are using the Bare React Native workflow, you’ll need to run `./gradlew assembleRelease` in the `android` directory and find the APK in `android/app/build/outputs/apk/release/app-release.apk`.

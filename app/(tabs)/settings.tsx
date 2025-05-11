@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable } from 'react-native';
-import { useAppState } from './AppStateContext';
-import { useTheme } from './Theme';
+import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable, StyleSheet } from 'react-native';
+import { useAppState } from '@/components/AppStateContext';
+import { useTheme } from '@/components/Theme';
 import * as FileSystem from 'expo-file-system';
-import { DEFAULT_SYMPTOMS } from '../features/symptoms/symptomUtils';
+import { DEFAULT_SYMPTOMS } from '../../features/symptomUtils';
 
 const EMOJI_OPTIONS = Array.from(new Set([
   '😀','😁','😂','🤣','😊','😍','😎','😢','😭','😡','😱','😴','🤒','🤕','🤢','🤧','🥵','🥶','🥳','😇','🤠','🤡','💩','👻','💤','💢','🤕','💨','😡','😴','🤲','🍽️','📝','💥','🧠','🧴','🍔','🤧','😷','🤒','🤕','😵','🤯','🥴','🥺','😬','😳','😶','😐','😑','😒','🙄','😏','😣','😖','😫','😩','🥱','😤','😠','😡','🤬','😈','👿','💀','☠️','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦥','🦦','🦨','🦡','🐁','🐀','🐇','🐿️','🦔'
 ]));
 
-const Settings: React.FC = () => {
-  const { weightUnit, setWeightUnit, setWeightLogs, setPeriodDays, setSymptomLogs, setAllSymptoms, autoAddPeriodDays, setAutoAddPeriodDays, periodAutoLogLength, setPeriodAutoLogLength, showOvulation, setShowOvulation, showFertileWindow, setShowFertileWindow } = useAppState();
+export default function SettingsScreen () {
+  const appState = useAppState();
+  const { weightUnit, setWeightUnit, setWeightLogs, 
+    setPeriodDays, setSymptomLogs, setAllSymptoms, 
+    autoAddPeriodDays, setAutoAddPeriodDays, periodAutoLogLength, 
+    setPeriodAutoLogLength, showOvulation, setShowOvulation, 
+    showFertileWindow, setShowFertileWindow } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
+  const { accentColor, setAccentColor } = useAppState();
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -26,8 +32,7 @@ const Settings: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.background }}>
-      {/* --- Settings Header --- */}
-      <Text style={{ color: theme.text, fontSize: 22, fontWeight: 'bold', marginBottom: 16, marginTop: 10 }}>Settings</Text>
+
       {/* --- Weight Unit Selection --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Preferred Unit</Text>
       <View style={{ flexDirection: 'row', marginTop: 16 }}>
@@ -38,6 +43,7 @@ const Settings: React.FC = () => {
           <Text style={{ color: weightUnit === 'lbs' ? theme.fabText : theme.text, fontWeight: 'bold' }}>lbs</Text>
         </TouchableOpacity>
       </View>
+
       {/* --- Theme Switcher --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Preferred Theme</Text>
       <View style={{ flexDirection: 'row', marginBottom: 16 }}>
@@ -54,9 +60,39 @@ const Settings: React.FC = () => {
           <Text style={{ color: themeName === 'light' ? theme.fabText : theme.text, fontWeight: 'bold' }}>Light</Text>
         </TouchableOpacity>
       </View>
+
+      {/* --- Accent Color Picker --- */}
+      <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Accent Color</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <TextInput
+          style={{
+            height: 40,
+            width: 120,
+            borderRadius: 8,
+            backgroundColor: theme.inputBg,
+            color: theme.inputText,
+            borderColor: theme.border,
+            borderWidth: 1,
+            padding: 8,
+            marginRight: 12,
+            fontFamily: 'monospace',
+            fontSize: 16,
+          }}
+          value={accentColor}
+          onChangeText={setAccentColor}
+          placeholder="#4db8ff"
+          placeholderTextColor={theme.legendText}
+          maxLength={9}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: accentColor, borderWidth: 1, borderColor: theme.border }} />
+      </View>
+
       {/* --- Custom Symptoms Management --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Add Custom Symptoms</Text>
       <View style={{ width: '90%', marginBottom: 16 }}>
+
         {/* --- Add Custom Symptom Row --- */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
           <TouchableOpacity
@@ -65,6 +101,7 @@ const Settings: React.FC = () => {
           >
             <Text style={{ fontSize: 24 }}>{newSymptomEmoji || '😀'}</Text>
           </TouchableOpacity>
+
           <TextInput
             style={{ flex: 1, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border, borderWidth: 1, padding: 8, marginRight: 8 }}
             placeholder="Add custom symptom"
@@ -82,6 +119,7 @@ const Settings: React.FC = () => {
               }
             }}
           />
+
           <TouchableOpacity
             style={{ backgroundColor: theme.accent, borderRadius: 8, paddingVertical: 12, paddingHorizontal: 16 }}
             onPress={() => {
@@ -98,6 +136,7 @@ const Settings: React.FC = () => {
             <Text style={{ color: theme.background, fontWeight: 'bold' }}>Add</Text>
           </TouchableOpacity>
         </View>
+
         {/* --- Emoji Picker Modal for Custom Symptom --- */}
         <Modal
           visible={showEmojiPicker}
@@ -108,6 +147,7 @@ const Settings: React.FC = () => {
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
             <View style={{ backgroundColor: theme.background, borderRadius: 12, overflow: 'hidden', elevation: 8, width: '90%', maxWidth: 400, height: 380, justifyContent: 'center', alignItems: 'center', padding: 12 }}>
               <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>Pick an emoji</Text>
+
               <ScrollView contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }} style={{ maxHeight: 260, width: '100%' }}>
                 {EMOJI_OPTIONS.map(emoji => (
                   <TouchableOpacity
@@ -122,6 +162,7 @@ const Settings: React.FC = () => {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+
               <TouchableOpacity
                 style={{ marginTop: 8, padding: 10, alignSelf: 'center', backgroundColor: theme.card, borderRadius: 8 }}
                 onPress={() => setShowEmojiPicker(false)}
@@ -132,12 +173,14 @@ const Settings: React.FC = () => {
           </View>
         </Modal>
       </View>
+
       {/* --- Symptom added confirmation --- */}
       {showSymptomAdded && (
         <View style={{ position: 'absolute', top: 60, alignSelf: 'center', backgroundColor: theme.accent, borderRadius: 8, padding: 12, zIndex: 100 }}>
           <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Symptom added!</Text>
         </View>
       )}
+
       {/* --- Period Logging Preference --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Period Logging</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
@@ -151,6 +194,7 @@ const Settings: React.FC = () => {
           thumbColor={autoAddPeriodDays ? theme.fabText : theme.card}
         />
       </View>
+
       {/* --- Period Auto-Log Length Picker --- */}
       {autoAddPeriodDays && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
@@ -174,6 +218,7 @@ const Settings: React.FC = () => {
           </View>
         </View>
       )}
+
       {/* --- Ovulation and Fertile Window Toggles --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Calendar Settings</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
@@ -185,6 +230,7 @@ const Settings: React.FC = () => {
           thumbColor={showOvulation ? theme.fabText : theme.card}
         />
       </View>
+
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
         <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Show Fertile Window</Text>
         <Switch
@@ -194,6 +240,18 @@ const Settings: React.FC = () => {
           thumbColor={showFertileWindow ? theme.fabText : theme.card}
         />
       </View>
+
+        <Text style={[styles.text, { marginTop: 24, fontWeight: 'bold' }]}>Current App State:</Text>
+        <View style={styles.stateBox}>
+            <Text style={styles.stateText} selectable>
+            {JSON.stringify(appState, (key, value) => {
+                // Avoid serializing functions
+                if (typeof value === 'function') return undefined;
+                return value;
+            }, 2)}
+            </Text>
+        </View>
+
       {/* --- Delete All Data Button --- */}
       <TouchableOpacity
         style={{ marginTop: 32, backgroundColor: theme.error, borderRadius: 8, padding: 14, alignSelf: 'stretch', marginHorizontal: 24 }}
@@ -226,4 +284,29 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings;
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#25292e',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  text: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  stateBox: {
+    marginTop: 12,
+    backgroundColor: '#333',
+    borderRadius: 8,
+    padding: 12,
+    width: '100%',
+    maxWidth: 400,
+  },
+  stateText: {
+    color: '#ffd33d',
+    fontSize: 13,
+    fontFamily: 'monospace',
+  },
+});

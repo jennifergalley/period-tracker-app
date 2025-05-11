@@ -2,11 +2,11 @@ import 'react-native-gesture-handler';
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import WeightTracker from './components/WeightTracker';
+import WeightTracker from './components/old/WeightTracker';
 import Calendar from './components/Calendar';
 import Home from './components/Home';
 import { AppStateProvider } from './components/AppStateContext';
-import Settings from './components/Settings';
+import Settings from './components/old/Settings';
 import { ThemeProvider, useTheme } from './components/Theme';
 
 const Drawer = createDrawerNavigator();

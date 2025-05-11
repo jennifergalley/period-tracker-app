@@ -1,30 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, TextInput, Button, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Button, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DayView from './DayView';
-import ActivityLog from './ActivityLog';
+import DayView from '@/components/DayView';
+import ActivityLog from '@/components/ActivityLog';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { useAppState } from './AppStateContext';
-import { startOfDay } from 'date-fns';
-import { useTheme } from './Theme';
-import { calculateCycleInfo } from '../features/period/cycleUtils';
-
-// Helper to get days in month
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate();
-}
-
-// Helper to get first day of week (0=Sunday)
-function getFirstDayOfWeek(year: number, month: number) {
-  return new Date(year, month, 1).getDay();
-}
+import { useAppState } from '@/components/AppStateContext';
+import { useTheme } from '@/components/Theme';
+import { calculateCycleInfo } from '@/features/cycleUtils';
+import { startOfDay, getDaysInMonth, getFirstDayOfWeek } from '@/features/dateUtils';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4; // 4 for margin
 const TODAY = startOfDay(new Date());
 
-export const Calendar: React.FC = () => {
+export default function Calendar() {
   const { theme, themeName } = useTheme();
   const {
     weightLogs, setWeightLogs,
@@ -34,7 +24,7 @@ export const Calendar: React.FC = () => {
     allSymptoms, setAllSymptoms,
     autoAddPeriodDays, periodAutoLogLength,
     showOvulation, showFertileWindow,
-  } = useAppState(); // allSymptoms: Symptom[]
+  } = useAppState();
 
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth());
@@ -42,6 +32,7 @@ export const Calendar: React.FC = () => {
 
   // Use utility function for cycle info
   const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);
+
   // Conditionally use ovulation/fertile window based on settings
   const ovulationDayToShow = showOvulation ? ovulationDay : null;
   const fertileStartToShow = showFertileWindow ? fertileStart : null;
@@ -60,10 +51,12 @@ export const Calendar: React.FC = () => {
     const dStr = date.toDateString();
     const month = date.getMonth();
     const year = date.getFullYear();
+
     const periodDaysThisMonth = periodDays.filter(d => {
       const dObj = new Date(d);
       return dObj.getMonth() === month && dObj.getFullYear() === year;
     });
+
     if (!periodDays.includes(dStr)) {
       if (autoAddPeriodDays && periodDaysThisMonth.length === 0) {
         const newDays = Array.from({ length: periodAutoLogLength }, (_, i) => {
@@ -71,6 +64,7 @@ export const Calendar: React.FC = () => {
           newDate.setDate(newDate.getDate() + i);
           return newDate.toDateString();
         });
+
         setPeriodDays(prev => [...prev, ...newDays]
           .filter((v, i, arr) => arr.indexOf(v) === i)
           .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
@@ -110,6 +104,7 @@ export const Calendar: React.FC = () => {
   const days: (Date | null)[] = [];
   for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
+  
   // Build all days for log (e.g., last 60 days)
   const logDays: Date[] = [];
   for (let i = 0; i < 60; i++) {
@@ -158,6 +153,7 @@ export const Calendar: React.FC = () => {
       ? prev
       : [...prev, { name: symptomName, icon: '📝' }]);
   }
+
   function handleRemoveSymptom(symptomName: string) {
     setAllSymptoms((prev: { name: string; icon: string }[]) => prev.filter((s: { name: string; icon: string }) => s.name !== symptomName));
     setSymptomLogs((prev: { [date: string]: string[] }) => {
@@ -183,6 +179,7 @@ export const Calendar: React.FC = () => {
       {/* --- Calendar Month View UI --- */}
       <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['left', 'right', 'bottom']}>
+
         {/* --- Calendar Header (Month/Year, Navigation) --- */}
         <View style={styles.header}>
           <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
@@ -191,6 +188,7 @@ export const Calendar: React.FC = () => {
           </Text>
           <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
         </View>
+
         {/* --- Calendar Legend --- */}
         <View style={styles.legend}>
           <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
@@ -208,13 +206,19 @@ export const Calendar: React.FC = () => {
             </>
           )}
         </View>
+
         {/* --- Weekday Row --- */}
         <View style={styles.weekRow}>
-          {['S','M','T','W','T','F','S'].map((d, i) => <Text key={i} style={[styles.weekDay, { color: theme.text }]}>{d}</Text>)}
+          {['Sun','Mon','Tues','Wed','Thu','Fri','Sat'].map((d, i) => (
+            <View key={i} style={styles.weekDayCell}>
+              <Text style={[styles.weekDay, { color: theme.text }]}>{d}</Text>
+            </View>
+          ))}
         </View>
+
         {/* --- Calendar Grid (Days) --- */}
         <FlatList
-          style={{ flex: 1, alignSelf: 'stretch' }}
+          style={[ styles.calendarGrid ]}
           contentContainerStyle={{ flexGrow: 1, alignSelf: 'stretch' }}
           data={days}
           numColumns={7}
@@ -242,6 +246,20 @@ export const Calendar: React.FC = () => {
           )}
           scrollEnabled={false}
         />
+
+      {/* --- Activity Log Below Calendar --- */}
+      <View style={[styles.activityLog]}>
+        <ActivityLog
+          days={logDays}
+          periodDays={periodDays}
+          ovulationDay={ovulationDayToShow}
+          fertileStart={fertileStartToShow}
+          fertileEnd={fertileEndToShow}
+          symptomLogs={symptomLogs}
+          weightLogs={weightLogs}
+        />
+      </View>
+      
         {/* --- Day Modal (DayView) --- */}
         <Modal visible={dayModalVisible} transparent={false} animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
           <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -269,17 +287,7 @@ export const Calendar: React.FC = () => {
             <Button title="Close" onPress={() => setDayModalVisible(false)} />
           </View>
         </Modal>
-      </SafeAreaView>
-      {/* --- Activity Log Below Calendar --- */}
-      <ActivityLog
-        days={logDays}
-        periodDays={periodDays}
-        ovulationDay={ovulationDayToShow}
-        fertileStart={fertileStartToShow}
-        fertileEnd={fertileEndToShow}
-        symptomLogs={symptomLogs}
-        weightLogs={weightLogs}
-      />
+      
       {/* --- Floating Action Button for Today --- */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
@@ -291,6 +299,7 @@ export const Calendar: React.FC = () => {
       >
         <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
       </TouchableOpacity>
+      </SafeAreaView>
     </View>
   );
 };
@@ -300,8 +309,11 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, justifyContent: 'center', marginTop: 0 },
   headerText: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 16, textAlign: 'center' },
   navBtn: { fontSize: 20, padding: 8 },
+  calendarGrid: { flexGrow: 1, alignSelf: 'stretch' },
   weekRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'stretch' },
-  weekDay: { width: DAY_CELL_WIDTH, textAlign: 'center', fontWeight: 'bold' },
+  weekDayCell: { width: DAY_CELL_WIDTH, alignItems: 'center', justifyContent: 'center', margin: 2  },
+  weekDay: { fontWeight: 'bold', textAlign: 'center' },
+  activityLog: { flexGrow: 0, flexShrink: 1, minHeight: 0 },
   dayCell: { width: DAY_CELL_WIDTH, height: DAY_CELL_WIDTH, margin: 2, alignItems: 'center', justifyContent: 'center', borderRadius: 16, borderWidth: 1 },
   dayText: { fontWeight: 'bold' },
   todayCell: {
@@ -341,5 +353,3 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
 });
-
-export default Calendar;

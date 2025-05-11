@@ -48,7 +48,7 @@ const ThemeContext = createContext<{theme: Theme, setThemeName: (name: keyof typ
   themeName: 'dark',
 });
 
-export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+export default function ThemeProvider (children: React.ReactNode) {
   const [themeName, setThemeName] = useState<keyof typeof themes>('dark');
   const theme = themes[themeName];
   return (

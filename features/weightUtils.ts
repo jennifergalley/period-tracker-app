@@ -1,5 +1,12 @@
 // Utility functions for weight log management
-import { isAfter, isBefore } from 'date-fns';
+
+function isAfter(date: Date, compareDate: Date) {
+  return date.getTime() > compareDate.getTime();
+}
+
+function isBefore(date: Date, compareDate: Date) {
+  return date.getTime() < compareDate.getTime();
+}
 
 export function filterAndSortWeightLogs(weightLogs: any, startDate: Date, endDate: Date) {
   return Object.entries(weightLogs)
