@@ -34,6 +34,8 @@ export interface AppState {
   setThemeName: (theme: string) => void;
   accentColor: string;
   setAccentColor: (color: string) => void;
+  textLogs: { [date: string]: string };
+  setTextLogs: React.Dispatch<React.SetStateAction<{ [date: string]: string }>>;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -77,6 +79,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [showFertileWindow, setShowFertileWindow] = useState<boolean>(true);
   const [themeName, setThemeName] = useState<string>('dark');
   const [accentColor, setAccentColor] = useState<string>('#ffd33d');
+  const [textLogs, setTextLogs] = useState<{ [date: string]: string }>({});
 
   // Load state from storage on mount
   useEffect(() => {
@@ -94,14 +97,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (typeof data.showFertileWindow === 'boolean') setShowFertileWindow(data.showFertileWindow);
       if (data.themeName) setThemeName(data.themeName);
       if (data.accentColor) setAccentColor(data.accentColor);
+      if (data.textLogs) setTextLogs(data.textLogs);
     })();
   }, []);
 
   // Save state to storage whenever any part changes
   useEffect(() => {
-    const data = { weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength, showOvulation, showFertileWindow, themeName, accentColor };
+    const data = { weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength, showOvulation, showFertileWindow, themeName, accentColor, textLogs };
     storage.save(data);
-  }, [weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength, showOvulation, showFertileWindow, themeName, accentColor]);
+  }, [weightLogs, weightUnit, periodDays, symptomLogs, allSymptoms, autoAddPeriodDays, periodAutoLogLength, showOvulation, showFertileWindow, themeName, accentColor, textLogs]);
 
   return (
     <AppStateContext.Provider value={{
@@ -116,6 +120,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showFertileWindow, setShowFertileWindow,
       themeName, setThemeName,
       accentColor, setAccentColor,
+      textLogs, setTextLogs,
     }}>
       {children}
     </AppStateContext.Provider>

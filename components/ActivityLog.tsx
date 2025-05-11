@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from '@/components/Theme';
 import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
+import { Ionicons } from '@expo/vector-icons';
 
 type ActivityLogProps = {
   days: Date[];
@@ -12,6 +13,7 @@ type ActivityLogProps = {
   symptomLogs: { [date: string]: string[] };
   weightLogs: { [date: string]: { value: number; unit: 'kg' | 'lbs' } };
   allSymptoms?: { name: string; icon: string }[];
+  textLogs?: { [date: string]: string };
 }
 
 export default function ActivityLog (props: ActivityLogProps) {
@@ -47,8 +49,9 @@ export default function ActivityLog (props: ActivityLogProps) {
         const isFertile = props.fertileStart && props.fertileEnd && date >= props.fertileStart && date <= props.fertileEnd;
         const symptoms = props.symptomLogs[dStr] || [];
         const weight = props.weightLogs[dStr];
+        const textLog = props.textLogs ? props.textLogs[dStr] : undefined;
         // Only show days with data
-        if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight) return null;
+        if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight && !textLog) return null;
         
         return (
           <View key={dStr} style={[styles.logItem, { borderColor: theme.card }]}>
@@ -73,7 +76,18 @@ export default function ActivityLog (props: ActivityLogProps) {
             
             {/* --- Weight Log for the Day --- */}
             {weight && (
-              <Text style={[styles.logWeight, { color: theme.text }]}>Weight: {weight.value} {weight.unit}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                  <Ionicons name='barbell' color={theme.accent} size={24} style={{ marginRight: 4 }} />
+                  <Text style={[styles.logWeight, { color: theme.text, marginTop: 0 }]}>{weight.value} {weight.unit}</Text>
+                </View>
+            )}
+
+            {/* --- Text Log for the Day --- */}
+            {textLog && textLog.trim() !== '' && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                <Ionicons name='document-text-outline' color={theme.accent} size={24} style={{ marginRight: 4 }} />
+                <Text style={[styles.logTextLog, { color: theme.text, marginTop: 0 }]}>{textLog}</Text>
+              </View>
             )}
           </View>
         );
@@ -94,5 +108,6 @@ const styles = StyleSheet.create({
   logSymptoms: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
   logSymptom: { marginRight: 10, fontSize: 14 },
   logWeight: { fontSize: 14, marginTop: 2 },
+  logTextLog: { fontSize: 14, marginTop: 6, lineHeight: 20 },
   noDataText: { marginTop: 10, textAlign: 'center' },
 });

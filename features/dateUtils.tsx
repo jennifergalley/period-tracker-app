@@ -11,3 +11,10 @@ export function getDaysInMonth(year: number, month: number) {
 export function getFirstDayOfWeek(year: number, month: number) {
   return new Date(year, month, 1).getDay();
 }
+
+// Helper to check if a date is today
+export function isToday(date: Date) {
+  const TODAY = startOfDay(new Date());
+  const d = startOfDay(date);
+  return d.getTime() === TODAY.getTime();
+}

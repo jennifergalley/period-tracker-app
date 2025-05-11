@@ -22,6 +22,7 @@ export default function SettingsScreen () {
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showSymptomAdded, setShowSymptomAdded] = useState(false);
+  const [showAppState, setShowAppState] = useState(false);
 
   useEffect(() => {
     if (showSymptomAdded) {
@@ -241,16 +242,22 @@ export default function SettingsScreen () {
         />
       </View>
 
-        <Text style={[styles.text, { marginTop: 24, fontWeight: 'bold' }]}>Current App State:</Text>
-        <View style={styles.stateBox}>
+        <TouchableOpacity onPress={() => setShowAppState(s => !s)} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+          <Text style={{ color: theme.accent, fontWeight: 'bold', fontSize: 16, marginRight: 8 }}>
+            {showAppState ? '▼' : '▶'}
+          </Text>
+          <Text style={{ color: theme.text, fontSize: 15, fontWeight: 'bold'  }}>(DEBUG) {showAppState ? 'Hide' : 'Show'} App State</Text>
+        </TouchableOpacity>
+        {showAppState && (
+          <View style={styles.stateBox}>
             <Text style={styles.stateText} selectable>
-            {JSON.stringify(appState, (key, value) => {
-                // Avoid serializing functions
+              {JSON.stringify(appState, (key, value) => {
                 if (typeof value === 'function') return undefined;
                 return value;
-            }, 2)}
+              }, 2)}
             </Text>
-        </View>
+          </View>
+        )}
 
       {/* --- Delete All Data Button --- */}
       <TouchableOpacity

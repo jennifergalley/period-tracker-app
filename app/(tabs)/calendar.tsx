@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Button, Dimensions } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Button, Dimensions, PanResponder, ScrollView, GestureResponderEvent, PanResponderGestureState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DayView from '@/components/DayView';
 import ActivityLog from '@/components/ActivityLog';
@@ -7,12 +7,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
-import { calculateCycleInfo } from '@/features/cycleUtils';
-import { startOfDay, getDaysInMonth, getFirstDayOfWeek } from '@/features/dateUtils';
+import { calculateCycleInfo, getPredictedNextPeriodDays } from '@/features/cycleUtils';
+import { getDaysInMonth, getFirstDayOfWeek, isToday } from '@/features/dateUtils';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4; // 4 for margin
-const TODAY = startOfDay(new Date());
 
 export default function Calendar() {
   const { theme, themeName } = useTheme();
@@ -24,6 +23,7 @@ export default function Calendar() {
     allSymptoms, setAllSymptoms,
     autoAddPeriodDays, periodAutoLogLength,
     showOvulation, showFertileWindow,
+    textLogs
   } = useAppState();
 
   const today = new Date();
@@ -31,7 +31,10 @@ export default function Calendar() {
   const [year, setYear] = useState(today.getFullYear());
 
   // Use utility function for cycle info
-  const { ovulationDay, fertileStart, fertileEnd, periodStart } = calculateCycleInfo(periodDays);
+  const { ovulationDay, fertileStart, fertileEnd } = calculateCycleInfo(periodDays);
+
+  // Get predicted next period days (as Date objects)
+  const predictedNextPeriodDays = getPredictedNextPeriodDays(periodDays);
 
   // Conditionally use ovulation/fertile window based on settings
   const ovulationDayToShow = showOvulation ? ovulationDay : null;
@@ -44,6 +47,13 @@ export default function Calendar() {
     if (ovulationDayToShow && dStr === ovulationDayToShow.toDateString()) return theme.ovulation;
     if (fertileStartToShow && fertileEndToShow && date >= fertileStartToShow && date <= fertileEndToShow) return theme.fertile;
     return theme.card;
+  }
+
+  // Helper to check if a date is a predicted period day
+  function isPredictedPeriodDay(date: Date) {
+    return predictedNextPeriodDays.some(
+      d => d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate()
+    );
   }
 
   // Toggle period day
@@ -168,11 +178,23 @@ export default function Calendar() {
     });
   }
 
-  // Helper to check if a date is today
-  function isToday(date: Date) {
-    const d = startOfDay(date);
-    return d.getTime() === TODAY.getTime();
-  }
+
+  // PanResponder for swipe gestures on the calendar grid
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+        // Only respond to horizontal swipes
+        return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 20;
+      },
+      onPanResponderRelease: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+        if (gestureState.dx < -40) {
+          nextMonth();
+        } else if (gestureState.dx > 40) {
+          prevMonth();
+        }
+      },
+    })
+  ).current;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#181a20' }}>
@@ -180,85 +202,94 @@ export default function Calendar() {
       <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['left', 'right', 'bottom']}>
 
-        {/* --- Calendar Header (Month/Year, Navigation) --- */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
-          <Text style={[styles.headerText, { color: theme.text }]}>
-            {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
-          </Text>
-          <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
-        </View>
+          {/* --- Calendar Header (Month/Year, Navigation) --- */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
+            <Text style={[styles.headerText, { color: theme.text }]}>
+              {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
+            </Text>
+            <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
+          </View>
 
-        {/* --- Calendar Legend --- */}
-        <View style={styles.legend}>
-          <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
-          <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
-          {showFertileWindow && (
-            <>
-              <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
-              <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
-            </>
-          )}
-          {showOvulation && (
-            <>
-              <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
-              <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
-            </>
-          )}
-        </View>
-
-        {/* --- Weekday Row --- */}
-        <View style={styles.weekRow}>
-          {['Sun','Mon','Tues','Wed','Thu','Fri','Sat'].map((d, i) => (
-            <View key={i} style={styles.weekDayCell}>
-              <Text style={[styles.weekDay, { color: theme.text }]}>{d}</Text>
+          {/* --- Calendar Legend --- */}
+          <View style={[styles.legend, { flexWrap: 'wrap' }]}> 
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
             </View>
-          ))}
-        </View>
-
-        {/* --- Calendar Grid (Days) --- */}
-        <FlatList
-          style={[ styles.calendarGrid ]}
-          contentContainerStyle={{ flexGrow: 1, alignSelf: 'stretch' }}
-          data={days}
-          numColumns={7}
-          keyExtractor={(_, i) => i.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              disabled={!item}
-              onPress={() => item && handleDayPress(item)}
-            >
-              <View style={[
-                styles.dayCell,
-                { backgroundColor: item ? getDayColor(item) : 'transparent', borderColor: theme.border },
-                item && isToday(item) ? [styles.todayCell, { borderColor: theme.gold, backgroundColor: theme.card, shadowColor: theme.gold }] : null
-              ]}>
-                {item && (symptomLogs[item.toDateString()]?.length > 0) && (
-                  <MaterialCommunityIcons name="note-outline" size={16} color={theme.gold} style={{ position: 'absolute', top: 4, right: 4 }} />
-                )}
-                <Text style={[
-                  styles.dayText,
-                  { color: theme.text },
-                  item && isToday(item) ? [styles.todayText, { color: theme.gold }] : null
-                ]}>{item ? item.getDate() : ''}</Text>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { borderColor: theme.period, borderWidth: 2, backgroundColor: 'transparent' }]} />
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Predicted Period</Text>
+            </View>
+            {showFertileWindow && (
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
+                <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
               </View>
-            </TouchableOpacity>
-          )}
-          scrollEnabled={false}
-        />
+            )}
+            {showOvulation && (
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
+                <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
+              </View>
+            )}
+          </View>
 
-      {/* --- Activity Log Below Calendar --- */}
-      <View style={[styles.activityLog]}>
-        <ActivityLog
-          days={logDays}
-          periodDays={periodDays}
-          ovulationDay={ovulationDayToShow}
-          fertileStart={fertileStartToShow}
-          fertileEnd={fertileEndToShow}
-          symptomLogs={symptomLogs}
-          weightLogs={weightLogs}
-        />
-      </View>
+          {/* --- Weekday Row --- */}
+          <View style={styles.weekRow}>
+            {['Sun','Mon','Tues','Wed','Thu','Fri','Sat'].map((d, i) => (
+              <View key={i} style={styles.weekDayCell}>
+                <Text style={[styles.weekDay, { color: theme.text }]}>{d}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* --- Calendar Grid (Days) --- */}
+          <View
+            style={{ flexDirection: 'row', flexWrap: 'wrap', alignSelf: 'stretch' }}
+            {...panResponder.panHandlers}
+          >
+            {days.map((item, i) => (
+              <TouchableOpacity
+                key={i}
+                disabled={!item}
+                onPress={() => item && handleDayPress(item)}
+              >
+                <View style={[
+                  styles.dayCell,
+                  item && periodDays.includes(item.toDateString())
+                    ? { backgroundColor: theme.period, borderColor: theme.period }
+                    : item && isPredictedPeriodDay(item)
+                      ? { backgroundColor: 'transparent', borderColor: theme.period, borderWidth: 2 }
+                      : { backgroundColor: item ? getDayColor(item) : 'transparent', borderColor: theme.border },
+                  item && isToday(item) ? [styles.todayCell, { borderColor: theme.gold, backgroundColor: theme.card, shadowColor: theme.gold }] : null
+                ]}>
+                  {item && (symptomLogs[item.toDateString()]?.length > 0) && (
+                    <MaterialCommunityIcons name="note-outline" size={16} color={theme.gold} style={{ position: 'absolute', top: 4, right: 4 }} />
+                  )}
+                  <Text style={[
+                    styles.dayText,
+                    { color: theme.text },
+                    item && isToday(item) ? [styles.todayText, { color: theme.gold }] : null
+                  ]}>{item ? item.getDate() : ''}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+        {/* --- Activity Log Below Calendar --- */}
+        <View style={[styles.activityLog]}>
+          <ActivityLog
+            days={logDays}
+            periodDays={periodDays}
+            ovulationDay={ovulationDayToShow}
+            fertileStart={fertileStartToShow}
+            fertileEnd={fertileEndToShow}
+            symptomLogs={symptomLogs}
+            weightLogs={weightLogs}
+            textLogs={textLogs}
+          />
+        </View>
       
         {/* --- Day Modal (DayView) --- */}
         <Modal visible={dayModalVisible} transparent={false} animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
@@ -327,9 +358,10 @@ const styles = StyleSheet.create({
   todayText: {
     fontWeight: 'bold',
   },
-  legend: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8, justifyContent: 'center' },
-  legendDot: { width: 16, height: 16, borderRadius: 8, marginHorizontal: 6 },
-  legendText: { marginRight: 16, fontSize: 16, fontWeight: 'bold' },
+  legend: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8, justifyContent: 'center', flexWrap: 'wrap' },
+  legendItem: { flexDirection: 'row', alignItems: 'center', marginRight: 16, marginBottom: 4 },
+  legendDot: { width: 16, height: 16, borderRadius: 8, marginRight: 6 },
+  legendText: { fontSize: 16, fontWeight: 'bold' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { padding: 20, borderRadius: 10, width: 300, alignItems: 'center' },
   input: { borderWidth: 1, borderRadius: 5, padding: 8, marginTop: 8, width: 200, textAlign: 'center' },

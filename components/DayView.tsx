@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/components/Theme';
 import { useAppState } from '@/components/AppStateContext';
@@ -30,25 +30,76 @@ export default function DayView(props: DayViewProps) {
   } = props;
     const {
       weightUnit,
+      textLogs, setTextLogs
     } = useAppState();
 
   const [showSymptoms, setShowSymptoms] = useState(true);
   const [weightInput, setWeightInput] = useState(weightLog ? String(weightLog.value) : '');
   const [showWeight, setShowWeight] = useState(true);
   const weightInputRef = useRef<TextInput>(null);
+  const [showToast, setShowToast] = useState(false);
+
+  // Text log state for this day
+  const dStr = date.toDateString();
+  const [textLog, setTextLog] = useState(textLogs[dStr] || '');
 
   // Update input if user switches days
   React.useEffect(() => {
     setWeightInput(weightLog ? String(weightLog.value) : '');
   }, [weightLog]);
 
+  // Update textLog state if user switches days
+  React.useEffect(() => {
+    setTextLog(textLogs[dStr] || '');
+  }, [dStr]);
+
+  // Save text log to context on unmount (modal close)
+  React.useEffect(() => {
+    return () => {
+      setTextLogs(prev => {
+        if (textLog.trim() === '') {
+          // Remove empty logs
+          const { [dStr]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [dStr]: textLog };
+      });
+    };
+  }, [textLog, dStr, setTextLogs]);
+
   // Add haptic feedback for long-press delete
   const triggerHaptic = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
+  // Save all data handler
+  const handleSave = () => {
+    // Close the keyboard
+    Keyboard.dismiss();
+
+    // Save weight
+    const val = parseFloat(weightInput);
+    if (!isNaN(val)) {
+      onLogWeight(val, weightUnit);
+    }
+    // Save notes
+    setTextLogs(prev => {
+      if (textLog.trim() === '') {
+        const { [dStr]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [dStr]: textLog };
+    });
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
+
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
       {/* --- Main Day View Scrollable Content --- */}
       <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
         
@@ -119,28 +170,60 @@ export default function DayView(props: DayViewProps) {
               value={weightInput}
               onChangeText={setWeightInput}
               keyboardType="numeric"
+              inputMode="decimal"
               textAlign="center"
-            />
-            <TouchableOpacity
-              style={[styles.weightSaveBtn, { backgroundColor: theme.accent }]}
-              onPress={() => {
+              onBlur={() => {
                 const val = parseFloat(weightInput);
                 if (!isNaN(val)) {
-                  weightInputRef.current?.blur();
                   onLogWeight(val, weightUnit);
-                  Keyboard.dismiss();
                 }
               }}
-            >
-              <Text style={[styles.weightSaveBtnText, { color: theme.background }]}>Save</Text>
-            </TouchableOpacity>
+            />
           </View>
         )}
-        {showWeight && weightLog && (
-          <Text style={[styles.weightLoggedText, { color: theme.text }]}>Logged: {weightLog.value} {weightLog.unit}</Text>
-        )}
+
+        {/* --- Text Log Section --- */}
+        <Text style={[styles.textLogHeader, { color: theme.text }]}>Notes</Text>
+        <TextInput
+          style={[styles.textLogInput, { backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
+          multiline
+          numberOfLines={6}
+          value={textLog}
+          onChangeText={setTextLog}
+          placeholder="Write anything about today..."
+          placeholderTextColor={theme.legendText}
+          textAlignVertical="top"
+          returnKeyType="done"
+        />
       </ScrollView>
-    </>
+      {/* --- Save Button at Bottom --- */}
+      <TouchableOpacity
+        style={{ margin: 24, backgroundColor: theme.accent, borderRadius: 10, paddingVertical: 16, alignItems: 'center' }}
+        onPress={handleSave}
+        accessibilityLabel="Save entry"
+      >
+        <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 18 }}>Save</Text>
+      </TouchableOpacity>
+      {showToast && (
+        <View style={{
+          position: 'absolute',
+          bottom: 40,
+          alignSelf: 'center',
+          backgroundColor: theme.accent,
+          borderRadius: 8,
+          paddingVertical: 10,
+          paddingHorizontal: 24,
+          zIndex: 100,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 6,
+        }}>
+          <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Entry saved!</Text>
+        </View>
+      )}
+    </KeyboardAvoidingView>
   );
 };
 
@@ -167,4 +250,6 @@ const styles = StyleSheet.create({
   weightSaveBtn: { borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
   weightSaveBtnText: { fontWeight: 'bold', fontSize: 15 },
   weightLoggedText: { fontSize: 14, marginTop: 2 },
+  textLogHeader: { fontWeight: 'bold', fontSize: 16, marginTop: 24, marginBottom: 8, alignSelf: 'flex-start' },
+  textLogInput: { minHeight: 120, width: '100%', borderRadius: 10, borderWidth: 1, padding: 12, fontSize: 16, marginBottom: 8 },
 });
