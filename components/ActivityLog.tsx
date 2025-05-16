@@ -1,28 +1,42 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from '@/components/Theme';
+import { useAppState } from '@/components/AppStateContext';
 import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
 import { Ionicons } from '@expo/vector-icons';
+import { formatDate } from '@/features/dateUtils';
+import { toDateKey } from '@/features/dateUtils';
 
-type ActivityLogProps = {
-  days: Date[];
-  periodDays: string[];
-  ovulationDay: Date | null;
-  fertileStart: Date | null;
-  fertileEnd: Date | null;
-  symptomLogs: { [date: string]: string[] };
-  weightLogs: { [date: string]: { value: number; unit: 'kg' | 'lbs' } };
-  allSymptoms?: { name: string; icon: string }[];
-  textLogs?: { [date: string]: string };
-}
-
-export default function ActivityLog (props: ActivityLogProps) {
+export default function ActivityLog() {
   const { theme } = useTheme();
-  const symptomDict = (props.allSymptoms || DEFAULT_SYMPTOMS).reduce((acc, s) => { acc[s.name] = s.icon; return acc; }, {} as Record<string, string>);
-  
+  const {
+    periodRanges,
+    ovulationDay: appOvulationDay,
+    predictedFertileWindow: appFertileWindow,
+    symptomLogs,
+    weightLogs,
+    allSymptoms,
+    textLogs
+  } = useAppState();
+
+  // Build a list of all days for the activity log (e.g., last 60 days)
+  const days: Date[] = [];
+  for (let i = 0; i < 60; i++) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0); // Set time to midnight
+    d.setDate(d.getDate() - i);
+    days.push(new Date(d));
+  }
+
+  // Create a dictionary of symptoms with their icons as values
+  const symptomDict = (allSymptoms || DEFAULT_SYMPTOMS).reduce((acc, s) => {
+    acc[s.name] = s.icon;
+    return acc;
+  }, {} as Record<string, string>);
+
   // Sort days descending (today first)
-  const sortedDays = [...props.days].sort((a, b) => b.getTime() - a.getTime());
-  
+  const sortedDays = [...days].sort((a, b) => b.getTime() - a.getTime());
+
   return (
     // --- Activity Log Scrollable Container ---
     <ScrollView style={[styles.logContainer, { backgroundColor: theme.background, borderTopColor: theme.border }]} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -31,11 +45,11 @@ export default function ActivityLog (props: ActivityLogProps) {
 
       {/* --- No Data Message --- */}
       {sortedDays.every(date => {
-        const dStr = date.toDateString();
-        const isPeriod = props.periodDays.includes(dStr);
-        const isOvulation = props.ovulationDay && dStr === props.ovulationDay.toDateString();
-        const isFertile = props.fertileStart && props.fertileEnd && date >= props.fertileStart && date <= props.fertileEnd;
-        const symptoms = props.symptomLogs[dStr] || [];
+        const dStr = toDateKey(date);
+        const isPeriod = periodRanges.containsDate(date);
+        const isOvulation = appOvulationDay && dStr === toDateKey(appOvulationDay);
+        const isFertile = appFertileWindow && appFertileWindow.containsDate(date);
+        const symptoms = symptomLogs[dStr] || [];
         return !isPeriod && !isOvulation && !isFertile && symptoms.length === 0;
       }) && (
         <Text style={[styles.noDataText, { color: theme.text }]}>No data entered yet</Text>
@@ -43,22 +57,20 @@ export default function ActivityLog (props: ActivityLogProps) {
 
       {/* --- Activity Log Items (One per Day) --- */}
       {sortedDays.map(date => {
-        const dStr = date.toDateString();
-        const isPeriod = props.periodDays.includes(dStr);
-        const isOvulation = props.ovulationDay && dStr === props.ovulationDay.toDateString();
-        const isFertile = props.fertileStart && props.fertileEnd && date >= props.fertileStart && date <= props.fertileEnd;
-        const symptoms = props.symptomLogs[dStr] || [];
-        const weight = props.weightLogs[dStr];
-        const textLog = props.textLogs ? props.textLogs[dStr] : undefined;
-        // Only show days with data
+        const dStr = toDateKey(date);
+        const isPeriod = periodRanges.containsDate(date);
+        const isOvulation = appOvulationDay && dStr === toDateKey(appOvulationDay);
+        const isFertile = appFertileWindow && appFertileWindow.containsDate(date);
+        const symptoms = symptomLogs[dStr] || [];
+        const weight = weightLogs[dStr];
+        const textLog = textLogs ? textLogs[dStr] : undefined;
         if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight && !textLog) return null;
-        
         return (
-          <View key={dStr} style={[styles.logItem, { borderColor: theme.card }]}>
+          <View key={dStr} style={[styles.logItem, { borderColor: theme.card }]}> 
             {/* --- Date --- */}
-            <Text style={[styles.logDate, { color: theme.text }]}>{dStr}</Text>
+            <Text style={[styles.logDate, { color: theme.text }]}>{formatDate(date)}</Text>
 
-            {/* --- Badges for Period/Fertile/Ovulation --- */}
+            {/* --- Badges for Period/Fertile/Ovulation/Predicted Period --- */}
             <View style={styles.logBadges}>
               {isPeriod && <Text style={[styles.periodBadge, { backgroundColor: theme.period, color: theme.text }]}>Period</Text>}
               {isFertile && <Text style={[styles.fertileBadge, { backgroundColor: theme.fertile, color: theme.background }]}>Fertile</Text>}
@@ -68,18 +80,21 @@ export default function ActivityLog (props: ActivityLogProps) {
             {/* --- Symptom List for the Day --- */}
             {symptoms.length > 0 && (
               <View style={styles.logSymptoms}>
-                {symptoms.map(s => (
-                  <Text key={s} style={[styles.logSymptom, { color: theme.text }]}> {symptomDict[s] || '📝'} {s}</Text>
-                ))}
+                {symptoms.map(s => {
+                  const icon = symptomDict[s] || symptomDict[s.trim()] || '📝';
+                  return (
+                    <Text key={s} style={[styles.logSymptom, { color: theme.text }]}> {icon} {s}</Text>
+                  );
+                })}
               </View>
             )}
             
             {/* --- Weight Log for the Day --- */}
             {weight && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                  <Ionicons name='barbell' color={theme.accent} size={24} style={{ marginRight: 4 }} />
-                  <Text style={[styles.logWeight, { color: theme.text, marginTop: 0 }]}>{weight.value} {weight.unit}</Text>
-                </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                <Ionicons name='barbell' color={theme.accent} size={24} style={{ marginRight: 4 }} />
+                <Text style={[styles.logWeight, { color: theme.text, marginTop: 0 }]}>{weight.value} {weight.unit}</Text>
+              </View>
             )}
 
             {/* --- Text Log for the Day --- */}

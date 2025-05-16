@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable, StyleSheet, Platform } from 'react-native';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import * as FileSystem from 'expo-file-system';
-import { DEFAULT_SYMPTOMS } from '../../features/symptomUtils';
-
-const EMOJI_OPTIONS = Array.from(new Set([
-  '😀','😁','😂','🤣','😊','😍','😎','😢','😭','😡','😱','😴','🤒','🤕','🤢','🤧','🥵','🥶','🥳','😇','🤠','🤡','💩','👻','💤','💢','🤕','💨','😡','😴','🤲','🍽️','📝','💥','🧠','🧴','🍔','🤧','😷','🤒','🤕','😵','🤯','🥴','🥺','😬','😳','😶','😐','😑','😒','🙄','😏','😣','😖','😫','😩','🥱','😤','😠','😡','🤬','😈','👿','💀','☠️','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦥','🦦','🦨','🦡','🐁','🐀','🐇','🐿️','🦔'
-]));
+import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
+import { DateRangeList } from '@/features/DateRangeList';
 
 export default function SettingsScreen () {
   const appState = useAppState();
   const { weightUnit, setWeightUnit, setWeightLogs, 
-    setPeriodDays, setSymptomLogs, setAllSymptoms, 
-    autoAddPeriodDays, setAutoAddPeriodDays, periodAutoLogLength, 
-    setPeriodAutoLogLength, showOvulation, setShowOvulation, 
-    showFertileWindow, setShowFertileWindow } = useAppState();
+    setPeriodRanges, setSymptomLogs, setAllSymptoms, 
+    autoAddPeriodDays, setAutoAddPeriodDays, 
+    typicalPeriodLength, setTypicalPeriodLength, 
+    showOvulation, setShowOvulation, 
+    showFertileWindow, setShowFertileWindow,
+    setTextLogs } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
   const { accentColor, setAccentColor } = useAppState();
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showSymptomAdded, setShowSymptomAdded] = useState(false);
   const [showAppState, setShowAppState] = useState(false);
 
@@ -96,13 +94,16 @@ export default function SettingsScreen () {
 
         {/* --- Add Custom Symptom Row --- */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-          <TouchableOpacity
-            onPress={() => setShowEmojiPicker(true)}
-            style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
-          >
-            <Text style={{ fontSize: 24 }}>{newSymptomEmoji || '😀'}</Text>
-          </TouchableOpacity>
-
+          <TextInput
+            style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8, fontSize: 24, textAlign: 'center', color: theme.inputText }}
+            placeholder="😀"
+            placeholderTextColor={theme.legendText}
+            value={newSymptomEmoji}
+            onChangeText={text => setNewSymptomEmoji(text.slice(0, 2))}
+            maxLength={2}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
           <TextInput
             style={{ flex: 1, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border, borderWidth: 1, padding: 8, marginRight: 8 }}
             placeholder="Add custom symptom"
@@ -120,7 +121,6 @@ export default function SettingsScreen () {
               }
             }}
           />
-
           <TouchableOpacity
             style={{ backgroundColor: theme.accent, borderRadius: 8, paddingVertical: 12, paddingHorizontal: 16 }}
             onPress={() => {
@@ -137,42 +137,6 @@ export default function SettingsScreen () {
             <Text style={{ color: theme.background, fontWeight: 'bold' }}>Add</Text>
           </TouchableOpacity>
         </View>
-
-        {/* --- Emoji Picker Modal for Custom Symptom --- */}
-        <Modal
-          visible={showEmojiPicker}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowEmojiPicker(false)}
-        >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
-            <View style={{ backgroundColor: theme.background, borderRadius: 12, overflow: 'hidden', elevation: 8, width: '90%', maxWidth: 400, height: 380, justifyContent: 'center', alignItems: 'center', padding: 12 }}>
-              <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>Pick an emoji</Text>
-
-              <ScrollView contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }} style={{ maxHeight: 260, width: '100%' }}>
-                {EMOJI_OPTIONS.map(emoji => (
-                  <TouchableOpacity
-                    key={emoji}
-                    style={{ padding: 8, margin: 2, borderRadius: 8, backgroundColor: newSymptomEmoji === emoji ? theme.accent : 'transparent' }}
-                    onPress={() => {
-                      setNewSymptomEmoji(emoji);
-                      setShowEmojiPicker(false);
-                    }}
-                  >
-                    <Text style={{ fontSize: 28 }}>{emoji}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <TouchableOpacity
-                style={{ marginTop: 8, padding: 10, alignSelf: 'center', backgroundColor: theme.card, borderRadius: 8 }}
-                onPress={() => setShowEmojiPicker(false)}
-              >
-                <Text style={{ color: theme.text, fontWeight: 'bold' }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
 
       {/* --- Symptom added confirmation --- */}
@@ -204,14 +168,14 @@ export default function SettingsScreen () {
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Pressable
-              onPress={() => setPeriodAutoLogLength(l => Math.max(1, l - 1))}
+              onPress={() => setTypicalPeriodLength(l => Math.max(1, l - 1))}
               style={{ backgroundColor: theme.card, borderRadius: 8, padding: 8, marginRight: 8 }}
             >
               <Text style={{ color: theme.text, fontSize: 20 }}>-</Text>
             </Pressable>
-            <Text style={{ color: theme.text, fontSize: 18, minWidth: 32, textAlign: 'center' }}>{periodAutoLogLength}</Text>
+            <Text style={{ color: theme.text, fontSize: 18, minWidth: 32, textAlign: 'center' }}>{typicalPeriodLength}</Text>
             <Pressable
-              onPress={() => setPeriodAutoLogLength(l => Math.min(14, l + 1))}
+              onPress={() => setTypicalPeriodLength(l => Math.min(14, l + 1))}
               style={{ backgroundColor: theme.card, borderRadius: 8, padding: 8, marginLeft: 8 }}
             >
               <Text style={{ color: theme.text, fontSize: 20 }}>+</Text>
@@ -263,26 +227,47 @@ export default function SettingsScreen () {
       <TouchableOpacity
         style={{ marginTop: 32, backgroundColor: theme.error, borderRadius: 8, padding: 14, alignSelf: 'stretch', marginHorizontal: 24 }}
         onPress={async () => {
-          Alert.alert(
-            'Delete All Logs',
-            'Are you sure you want to delete all your logged data? This action is NOT reversible.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Delete', style: 'destructive', onPress: async () => {
-                  try {
-                    await FileSystem.deleteAsync(FileSystem.documentDirectory + 'appState.json', { idempotent: true });
-                  } catch {}
-                  // Optionally, reset state in context (forces UI update)
-                  setWeightLogs({});
-                  setWeightUnit('lbs');
-                  setPeriodDays([]);
-                  setSymptomLogs({});
-                  setAllSymptoms(DEFAULT_SYMPTOMS);
+          if (Platform.OS === 'web') {
+            const confirmed = window.confirm('Are you sure you want to delete all your logged data? This action is NOT reversible.');
+            if (!confirmed) return;
+            setWeightLogs({});
+            setWeightUnit('lbs');
+            setPeriodRanges(new DateRangeList());
+            setSymptomLogs({});
+            setAllSymptoms(DEFAULT_SYMPTOMS);
+            setPeriodRanges(new DateRangeList());
+            setAutoAddPeriodDays(true);
+            setTypicalPeriodLength(5);
+            setShowOvulation(true);
+            setShowFertileWindow(true);
+            setTextLogs({});
+          } else {
+            Alert.alert(
+              'Delete All Logs',
+              'Are you sure you want to delete all your logged data? This action is NOT reversible.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete', style: 'destructive', onPress: async () => {
+                    try {
+                      await FileSystem.deleteAsync(FileSystem.documentDirectory + 'appState.json', { idempotent: true });
+                    } catch {}
+                    setWeightLogs({});
+                    setWeightUnit('lbs');
+                    setPeriodRanges(new DateRangeList());
+                    setSymptomLogs({});
+                    setAllSymptoms(DEFAULT_SYMPTOMS);
+                    setPeriodRanges(new DateRangeList());
+                    setAutoAddPeriodDays(true);
+                    setTypicalPeriodLength(5);
+                    setShowOvulation(true);
+                    setShowFertileWindow(true);
+                    setTextLogs({});
+                  }
                 }
-              }
-            ]
-          );
+              ]
+            );
+          }
         }}
       >
         <Text style={{ color: theme.background, fontWeight: 'bold', textAlign: 'center' }}>Delete All Logs</Text>

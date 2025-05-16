@@ -1,4 +1,5 @@
 // Utility functions for weight log management
+import { toDateKey } from '@/features/dateUtils';
 
 function isAfter(date: Date, compareDate: Date) {
   return date.getTime() > compareDate.getTime();
@@ -34,10 +35,10 @@ export function prepareWeightChartData(logEntries: any[]) {
 
 export function addOrUpdateWeightLog(prevLogs: any, logDate: Date, value: number, unit: string, originalLogDate: Date | null) {
   const logs = { ...prevLogs };
-  const dateKey = logDate.toDateString();
-  if (originalLogDate && originalLogDate.toDateString() !== dateKey) {
+  const dateKey = toDateKey(logDate);
+  if (originalLogDate && toDateKey(originalLogDate) !== dateKey) {
     // Remove old entry if editing date
-    delete logs[originalLogDate.toDateString()];
+    delete logs[toDateKey(originalLogDate)];
   }
   logs[dateKey] = { value, unit };
   return logs;
@@ -45,6 +46,6 @@ export function addOrUpdateWeightLog(prevLogs: any, logDate: Date, value: number
 
 export function deleteWeightLog(prevLogs: any, logDate: Date) {
   const logs = { ...prevLogs };
-  delete logs[logDate.toDateString()];
+  delete logs[toDateKey(logDate)];
   return logs;
 }

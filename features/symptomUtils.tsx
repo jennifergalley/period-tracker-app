@@ -1,4 +1,6 @@
-// Default symptoms list for new users
+/**
+ * Default symptoms list for new users.
+ */
 export const DEFAULT_SYMPTOMS = [
   { name: 'Cramps', icon: '💢' },
   { name: 'Headache', icon: '🤕' },

@@ -1,0 +1,7 @@
+# .copilot
+Always use TypeScript for new files.
+Prefer functional React components.
+Use async/await for asynchronous code.
+Always create helper methods in files in the features directory according to their function, e.g. put things related to cycles in cycleUtils.ts or date functions in the dateUtils.ts.
+Always create handler methods in Handlers.ts and re-use them first from there, so that we follow DRY principles.
+I want to be able to read and understand the code, so make sure you write well-documented code, with explainer comments and good documentation. Never delete comments that are already there unless they are todos you are checking off or pertain to code you are deleting.

@@ -1,19 +1,20 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Button, Dimensions, PanResponder, GestureResponderEvent, PanResponderGestureState } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Button, Dimensions, PanResponder } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DayView from '@/components/DayView';
-import ActivityLog from '@/components/ActivityLog';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import { getDaysInMonth, getFirstDayOfWeek, isToday, toDateKey } from '@/features/dateUtils';
 import { handleDayPress } from '@/features/Handlers';
+import DayView from '@/components/DayView';
+import ActivityLog from '@/components/ActivityLog';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4; // 4 for margin
+const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4;
 
-export default function Calendar() {  const { theme, themeName } = useTheme();
+export default function CalendarView() {
+  const { theme, themeName } = useTheme();
   const {
     weightLogs, setWeightLogs,
     weightUnit,
@@ -42,7 +43,6 @@ export default function Calendar() {  const { theme, themeName } = useTheme();
   function getDayColor(date: Date) {
     const dStr = toDateKey(date);
     if (periodRanges.containsDate(date)) return theme.period;
-    // Use predictedPeriods for predicted period highlighting
     if (predictedPeriods && predictedPeriods.containsDate(date)) return 'transparent';
     if (
       ovulationDayToShow &&
@@ -52,7 +52,7 @@ export default function Calendar() {  const { theme, themeName } = useTheme();
     if (fertileStartToShow && fertileEndToShow && date >= fertileStartToShow && date <= fertileEndToShow) return theme.fertile;
     return theme.card;
   }
-  
+
   // Navigation
   const prevMonth = () => {
     if (month === 0) {
@@ -86,11 +86,10 @@ export default function Calendar() {  const { theme, themeName } = useTheme();
   // PanResponder for swipe gestures on the calendar grid
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-        // Only respond to horizontal swipes
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
         return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 20;
       },
-      onPanResponderRelease: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+      onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dx < -40) {
           nextMonth();
         } else if (gestureState.dx > 40) {
@@ -101,93 +100,85 @@ export default function Calendar() {  const { theme, themeName } = useTheme();
   ).current;
 
   return (
-    // TODO: Start using the new Calendar component 
     <View style={{ flex: 1, backgroundColor: '#181a20' }}>
-      {/* --- Calendar Month View UI --- */}
       <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['left', 'right', 'bottom']}>
-
-          {/* --- Calendar Header (Month/Year, Navigation) --- */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
-            <Text style={[styles.headerText, { color: theme.text }]}>
-              {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
-            </Text>
-            <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
+        {/* --- Calendar Header (Month/Year, Navigation) --- */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
+          <Text style={[styles.headerText, { color: theme.text }]}>
+            {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
+          </Text>
+          <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
+        </View>
+        {/* --- Calendar Legend --- */}
+        <View style={[styles.legend, { flexWrap: 'wrap' }]}> 
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
+            <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
           </View>
-
-          {/* --- Calendar Legend --- */}
-          <View style={[styles.legend, { flexWrap: 'wrap' }]}> 
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { borderColor: theme.period, borderWidth: 2, backgroundColor: 'transparent' }]} />
+            <Text style={[styles.legendText, { color: theme.legendText }]}>Predicted Period</Text>
+          </View>
+          {showFertileWindow && (
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
-              <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
+              <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
             </View>
+          )}
+          {showOvulation && (
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { borderColor: theme.period, borderWidth: 2, backgroundColor: 'transparent' }]} />
-              <Text style={[styles.legendText, { color: theme.legendText }]}>Predicted Period</Text>
+              <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
             </View>
-            {showFertileWindow && (
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
-                <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
+          )}
+        </View>
+        {/* --- Weekday Row --- */}
+        <View style={styles.weekRow}>
+          {['Sun','Mon','Tues','Wed','Thu','Fri','Sat'].map((d, i) => (
+            <View key={i} style={styles.weekDayCell}>
+              <Text style={[styles.weekDay, { color: theme.text }]}>{d}</Text>
+            </View>
+          ))}
+        </View>
+        {/* --- Calendar Grid (Days) --- */}
+        <View
+          style={{ flexDirection: 'row', flexWrap: 'wrap', alignSelf: 'stretch' }}
+          {...panResponder.panHandlers}
+        >
+          {days.map((item, i) => (
+            <TouchableOpacity
+              key={i}
+              disabled={!item}
+              onPress={() => item && handleDayPress(item, setSelectedDay, setDayModalVisible)}
+            >
+            <View style={[
+                styles.dayCell,
+                item && periodRanges.containsDate(item)
+                  ? { backgroundColor: theme.period, borderColor: theme.period }
+                  : item && predictedPeriods && predictedPeriods.containsDate(item)
+                    ? { backgroundColor: 'transparent', borderColor: theme.period, borderWidth: 2 }
+                    : { backgroundColor: item ? getDayColor(item) : 'transparent', borderColor: theme.border },
+                item && isToday(item) && styles.todayCell,
+                item && isToday(item) && { borderColor: theme.gold, shadowColor: theme.gold }
+              ]}>
+                {item && (symptomLogs[toDateKey(item)]?.length > 0) && (
+                  <MaterialCommunityIcons name="note-outline" size={16} color={theme.gold} style={{ position: 'absolute', top: 4, right: 4 }} />
+                )}
+                <Text style={[
+                  styles.dayText,
+                  { color: theme.text },
+                  item && isToday(item) ? [styles.todayText, { color: theme.gold }] : null
+                ]}>{item ? item.getDate() : ''}</Text>
               </View>
-            )}
-            {showOvulation && (
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: theme.ovulation }]} />
-                <Text style={[styles.legendText, { color: theme.legendText }]}>Ovulation</Text>
-              </View>
-            )}
-          </View>
-
-          {/* --- Weekday Row --- */}
-          <View style={styles.weekRow}>
-            {['Sun','Mon','Tues','Wed','Thu','Fri','Sat'].map((d, i) => (
-              <View key={i} style={styles.weekDayCell}>
-                <Text style={[styles.weekDay, { color: theme.text }]}>{d}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* --- Calendar Grid (Days) --- */}
-          <View
-            style={{ flexDirection: 'row', flexWrap: 'wrap', alignSelf: 'stretch' }}
-            {...panResponder.panHandlers}
-          >
-            {days.map((item, i) => (
-              <TouchableOpacity
-                key={i}
-                disabled={!item}
-                onPress={() => item && handleDayPress(item, setSelectedDay, setDayModalVisible)}
-              >
-              <View style={[
-                  styles.dayCell,
-                  item && periodRanges.containsDate(item)
-                    ? { backgroundColor: theme.period, borderColor: theme.period }
-                    : item && predictedPeriods && predictedPeriods.containsDate(item)
-                      ? { backgroundColor: 'transparent', borderColor: theme.period, borderWidth: 2 }
-                      : { backgroundColor: item ? getDayColor(item) : 'transparent', borderColor: theme.border },
-                  item && isToday(item) && styles.todayCell,
-                  item && isToday(item) && { borderColor: theme.gold, shadowColor: theme.gold }
-                ]}>
-                  {item && (symptomLogs[toDateKey(item)]?.length > 0) && (
-                    <MaterialCommunityIcons name="note-outline" size={16} color={theme.gold} style={{ position: 'absolute', top: 4, right: 4 }} />
-                  )}
-                  <Text style={[
-                    styles.dayText,
-                    { color: theme.text },
-                    item && isToday(item) ? [styles.todayText, { color: theme.gold }] : null
-                  ]}>{item ? item.getDate() : ''}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
+            </TouchableOpacity>
+          ))}
+        </View>
         {/* --- Activity Log Below Calendar --- */}
         <View style={[styles.activityLog]}>          
           <ActivityLog />
         </View>
-      
         {/* --- Day Modal (DayView) --- */}
         <Modal visible={dayModalVisible} transparent={false} animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
           <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -202,22 +193,22 @@ export default function Calendar() {  const { theme, themeName } = useTheme();
             <Button title="Close" onPress={() => setDayModalVisible(false)} />
           </View>
         </Modal>
-      
-      {/* --- Floating Action Button for Today --- */}
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
-        onPress={() => {
-          setSelectedDay(today);
-          setDayModalVisible(true);
-        }}
-        accessibilityLabel="Open today in Day View"
-      >
-        <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
-      </TouchableOpacity>
+        {/* --- Floating Action Button for Today --- */}
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
+          onPress={() => {
+            setSelectedDay(today);
+            setDayModalVisible(true);
+          }}
+          accessibilityLabel="Open today in Day View"
+        >
+          <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'stretch' },

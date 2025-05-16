@@ -4,6 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { useAppState } from '@/components/AppStateContext';
 import { filterAndSortWeightLogs, addOrUpdateWeightLog, deleteWeightLog } from '@/features/weightUtils';
 import { useTheme } from '@/components/Theme';
+import { toDateKey } from '@/features/dateUtils';
 
 const dateRanges = [
   { label: 'This Month', months: 1 },
@@ -87,7 +88,7 @@ export default function WeightTracker() {
               </TouchableOpacity>
             </View>
             <View style={{ flexDirection: 'row', marginTop: 16 }}>
-              {weightLogs[logDate.toDateString()] && (
+              {weightLogs[toDateKey(logDate)] && (
                 <TouchableOpacity
                   style={[styles.weightSaveBtn, { backgroundColor: theme.error, marginRight: 12 }]}
                   onPress={() => {

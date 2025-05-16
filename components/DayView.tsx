@@ -3,95 +3,59 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert,
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/components/Theme';
 import { useAppState } from '@/components/AppStateContext';
+import { toDateKey } from '@/features/dateUtils';
+import {
+  handleTogglePeriod,
+  handleToggleSymptom,
+  handleAddSymptom,
+  handleRemoveSymptom,
+  handleDayPress,
+  handleLogWeight,
+  handleLogText,
+} from '@/features/Handlers';
 
 type DayViewProps = {
   date: Date;
   isPeriod: boolean;
   isFertile: boolean;
   isOvulation: boolean;
-  onTogglePeriod: (date: Date) => void;
-  symptomList: { name: string; icon: string }[];
-  symptoms: string[];
-  onToggleSymptom: (date: Date, symptom: string) => void;
-  onAddSymptom: (symptom: string, emoji: string) => void;
-  onRemoveSymptom: (symptom: string) => void;
-  periodDaysThisMonth: string[];
-  weightLog?: { value: number; unit: 'kg' | 'lbs' };
-  onLogWeight: (value: number, unit: 'kg' | 'lbs') => void;
-  weightUnit: 'kg' | 'lbs';
-  onToggleWeightUnit: () => void;
 }
 
 export default function DayView(props: DayViewProps) {
   const { theme } = useTheme();
   const {
-    date, isPeriod, isFertile, isOvulation, onTogglePeriod,
-    weightLog, onLogWeight, 
+    date,
+    isPeriod,
+    isFertile,
+    isOvulation,
   } = props;
-    const {
-      weightUnit,
-      textLogs, setTextLogs
-    } = useAppState();
+  const {
+    weightLogs,
+    setWeightLogs,
+    weightUnit,
+    textLogs,
+    setTextLogs,
+    symptomLogs,
+    setSymptomLogs,
+    allSymptoms,
+    periodRanges,
+    setPeriodRanges,
+    autoAddPeriodDays, 
+    typicalPeriodLength,
+  } = useAppState();
 
   const [showSymptoms, setShowSymptoms] = useState(true);
-  const [weightInput, setWeightInput] = useState(weightLog ? String(weightLog.value) : '');
   const [showWeight, setShowWeight] = useState(true);
-  const weightInputRef = useRef<TextInput>(null);
   const [showToast, setShowToast] = useState(false);
 
-  // Text log state for this day
-  const dStr = date.toDateString();
-  const [textLog, setTextLog] = useState(textLogs[dStr] || '');
-
-  // Update input if user switches days
-  React.useEffect(() => {
-    setWeightInput(weightLog ? String(weightLog.value) : '');
-  }, [weightLog]);
-
-  // Update textLog state if user switches days
-  React.useEffect(() => {
-    setTextLog(textLogs[dStr] || '');
-  }, [dStr]);
-
-  // Save text log to context on unmount (modal close)
-  React.useEffect(() => {
-    return () => {
-      setTextLogs(prev => {
-        if (textLog.trim() === '') {
-          // Remove empty logs
-          const { [dStr]: _, ...rest } = prev;
-          return rest;
-        }
-        return { ...prev, [dStr]: textLog };
-      });
-    };
-  }, [textLog, dStr, setTextLogs]);
+  // Logs for this day
+  const textLog = textLogs[toDateKey(date)] || '';
+  const symptomLog = symptomLogs[toDateKey(date)] || [];
+  const weightLog = weightLogs[toDateKey(date)];
 
   // Add haptic feedback for long-press delete
   const triggerHaptic = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
-
-  // Save all data handler
-  const handleSave = () => {
-    // Close the keyboard
-    Keyboard.dismiss();
-
-    // Save weight
-    const val = parseFloat(weightInput);
-    if (!isNaN(val)) {
-      onLogWeight(val, weightUnit);
-    }
-    // Save notes
-    setTextLogs(prev => {
-      if (textLog.trim() === '') {
-        const { [dStr]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [dStr]: textLog };
-    });
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
   };
 
   return (
@@ -112,7 +76,7 @@ export default function DayView(props: DayViewProps) {
         {/* --- Log Period Button --- */}
         <TouchableOpacity
           style={[styles.weightSaveBtn, { backgroundColor: theme.accent }]}
-          onPress={() => onTogglePeriod(date)}
+          onPress={() => handleTogglePeriod(date, periodRanges, setPeriodRanges, autoAddPeriodDays, typicalPeriodLength)}
         >
           <Text style={[styles.weightSaveBtnText, { color: theme.background }]}> 
             {isPeriod
@@ -129,12 +93,12 @@ export default function DayView(props: DayViewProps) {
 
         {showSymptoms && (
           <View style={styles.symptomListVertical}>
-            {props.symptomList.map(symptom => (
+            {allSymptoms.map(symptom => (
               <TouchableOpacity
                 key={symptom.name}
                 style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border }, 
-                  props.symptoms.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]}
-                onPress={() => props.onToggleSymptom(date, symptom.name)}
+                  symptomLog.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]}
+                onPress={() => handleToggleSymptom(date, symptom.name, setSymptomLogs)}
                 onLongPress={() => {
                   triggerHaptic();
                   Alert.alert(
@@ -142,13 +106,13 @@ export default function DayView(props: DayViewProps) {
                     `Remove "${symptom.name}" from your symptom list? This will also remove it from any day it was logged.`,
                     [
                       { text: 'Cancel', style: 'cancel' },
-                      { text: 'Remove', style: 'destructive', onPress: () => props.onRemoveSymptom(symptom.name) },
+                      { text: 'Remove', style: 'destructive', onPress: () => handleRemoveSymptom(symptom.name, setAllSymptoms, setSymptomLogs) },
                     ]
                   );
                 }}
               >
                 <Text style={styles.symptomEmoji}>{symptom.icon || '📝'}</Text>
-                <Text style={[styles.symptomTextVertical, { color: theme.text }, props.symptoms.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
+                <Text style={[styles.symptomTextVertical, { color: theme.text }, symptomLog.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -163,21 +127,24 @@ export default function DayView(props: DayViewProps) {
         {showWeight && (
           <View style={styles.weightRow}>
             <TextInput
-              ref={weightInputRef}
               style={[styles.weightInput, { width: 100, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
               placeholder={weightUnit}
               placeholderTextColor={theme.legendText}
-              value={weightInput}
-              onChangeText={setWeightInput}
+              value={weightLog !== undefined ? String(weightLog.value) : ''}
+              onChangeText={weight => {
+                // Allow empty string to clear the log
+                if (weight === '') {
+                  handleLogWeight(undefined, weightUnit, date, setWeightLogs);
+                } else {
+                  const val = parseFloat(weight);
+                  if (!isNaN(val)) {
+                    handleLogWeight(val, weightUnit, date, setWeightLogs);
+                  }
+                }
+              }}
               keyboardType="numeric"
               inputMode="decimal"
               textAlign="center"
-              onBlur={() => {
-                const val = parseFloat(weightInput);
-                if (!isNaN(val)) {
-                  onLogWeight(val, weightUnit);
-                }
-              }}
             />
           </View>
         )}
@@ -189,39 +156,13 @@ export default function DayView(props: DayViewProps) {
           multiline
           numberOfLines={6}
           value={textLog}
-          onChangeText={setTextLog}
+          onChangeText={text => handleLogText(date, text, setTextLogs)}
           placeholder="Write anything about today..."
           placeholderTextColor={theme.legendText}
           textAlignVertical="top"
           returnKeyType="done"
         />
       </ScrollView>
-      {/* --- Save Button at Bottom --- */}
-      <TouchableOpacity
-        style={{ margin: 24, backgroundColor: theme.accent, borderRadius: 10, paddingVertical: 16, alignItems: 'center' }}
-        onPress={handleSave}
-        accessibilityLabel="Save entry"
-      >
-        <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 18 }}>Save</Text>
-      </TouchableOpacity>
-      {showToast && (
-        <View style={{
-          position: 'absolute',
-          bottom: 40,
-          alignSelf: 'center',
-          backgroundColor: theme.accent,
-          borderRadius: 8,
-          paddingVertical: 10,
-          paddingHorizontal: 24,
-          zIndex: 100,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          elevation: 6,
-        }}>
-          <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Entry saved!</Text>
-        </View>
       )}
     </KeyboardAvoidingView>
   );
