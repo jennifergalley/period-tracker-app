@@ -95,7 +95,17 @@ export class DateRangeList {
      */
     getLastRange(): DateRange | null {
         if (this.ranges.length === 0) return null;
-        return this.ranges[this.ranges.length - 1];
+        
+        // Find the range with the latest end date (chronologically last)
+        let latest: DateRange | null = null;
+        let latestTime = -Infinity;
+        for (const range of this.ranges) {
+            if (range.end && range.end.getTime() > latestTime) {
+                latest = range;
+                latestTime = range.end.getTime();
+            }
+        }
+        return latest;
     }
 
     /**

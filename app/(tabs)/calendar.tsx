@@ -22,6 +22,10 @@ export default function Calendar() {
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [dayModalVisible, setDayModalVisible] = useState(false);
+  const [activityLogModalVisible, setActivityLogModalVisible] = useState(false);
+
+  // Track where DayView was opened from
+  const [openedFrom, setOpenedFrom] = useState<'ActivityLogModal' | 'CalendarView'>('CalendarView');
 
   // Use predicted values from app state
   const ovulationDayToShow = showOvulation ? predictedOvulationDay : null;
@@ -42,25 +46,58 @@ export default function Calendar() {
 
       {/* --- Activity Log Below Calendar --- */}
       <View style={[styles.activityLog]}>
-        <ActivityLog />
+        <ActivityLog 
+          onDayPress={date => {
+            setSelectedDay(date);
+            setDayModalVisible(true);
+            setOpenedFrom('CalendarView');
+          }}
+          onHeadingPress={() => setActivityLogModalVisible(true)}
+        />
       </View>
       
       {/* --- Day Modal --- */}
-      <Modal visible={dayModalVisible} transparent={false} animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
-          <View style={{ flex: 1, backgroundColor: theme.background }}>
-
-            {selectedDay && (
-              <DayView
-                date={selectedDay}
-                isPeriod={periodRanges.containsDate(selectedDay)}
-                isFertile={!!(fertileStartToShow && fertileEndToShow && selectedDay >= fertileStartToShow && selectedDay <= fertileEndToShow)}
-                isOvulation={!!(ovulationDayToShow && toDateKey(selectedDay) === toDateKey(ovulationDayToShow))}
-              />
-            )}
-            
-            <Button title="Close" onPress={() => setDayModalVisible(false)} />
-          </View>
+      <Modal visible={dayModalVisible} transparent={false} animationType="none" onRequestClose={() => {
+        setDayModalVisible(false);
+        if (openedFrom === 'ActivityLogModal') setActivityLogModalVisible(true);
+      }}>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
+          {selectedDay && (
+            <DayView
+              date={selectedDay}
+              isPeriod={periodRanges.containsDate(selectedDay)}
+              isFertile={!!(fertileStartToShow && fertileEndToShow && selectedDay >= fertileStartToShow && selectedDay <= fertileEndToShow)}
+              isOvulation={!!(ovulationDayToShow && toDateKey(selectedDay) === toDateKey(ovulationDayToShow))}
+            />
+          )}
+          <Button title="Close" onPress={() => {
+            setDayModalVisible(false);
+            if (openedFrom === 'ActivityLogModal') setActivityLogModalVisible(true);
+          }} />
+        </View>
       </Modal>      
+
+      {/* --- Activity Log Modal --- */}
+      <Modal visible={activityLogModalVisible} transparent={false} animationType="none" onRequestClose={() => {
+        setActivityLogModalVisible(false);
+        setOpenedFrom('CalendarView');
+      }}>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
+          <ActivityLog 
+            onDayPress={date => {
+              setSelectedDay(date);
+              setDayModalVisible(true);
+              setActivityLogModalVisible(false);
+              setOpenedFrom('ActivityLogModal');
+            }}
+            onHeadingPress={() => {}}
+          />
+          <Button title="Close" onPress={() => {
+            setActivityLogModalVisible(false);
+            setOpenedFrom('CalendarView');
+          }} />
+        </View>
+      </Modal>
 
       {/* --- Floating Action Button for Today --- */}
       <TouchableOpacity

@@ -45,9 +45,9 @@ export class CycleUtils {
         // Check if the date is already in the period ranges
         // If not, add it
         if (!newPeriodRanges.containsDate(startOfDate)) {
-            const lastPeriod = newPeriodRanges.getLastRange();
-            console.log("Last period:", lastPeriod);
-            console.log("Last period ended:", lastPeriod?.end);
+            const previousPeriod = newPeriodRanges.getLastRangeBefore(startOfDate);
+            console.log("Last period:", previousPeriod);
+            console.log("Last period ended:", previousPeriod?.end);
 
             // Check if we should auto-add the next period days
             if (
@@ -55,9 +55,9 @@ export class CycleUtils {
                 autoAddPeriodDays &&
                 (
                     // Either their last period does not exist
-                    !lastPeriod ||
+                    !previousPeriod ||
                     // or their last period ended more than 20 days ago
-                    (lastPeriod.end && (today.getTime() - lastPeriod.end.getTime()) > 20 * 24 * 60 * 60 * 1000)
+                    (previousPeriod.end && (today.getTime() - previousPeriod.end.getTime()) > 20 * 24 * 60 * 60 * 1000)
                 ))
             {
                 console.log("Auto-adding period days");
@@ -88,7 +88,7 @@ export class CycleUtils {
     static calculateFertileWindow(periodRanges: DateRangeList) {
         if (periodRanges.isEmpty()) return { ovulationDay: null, fertileWindow: new DateRange(null, null) };
 
-        // Get the last period range
+        // Get the chronologically last period range
         const lastPeriod = periodRanges.getLastRange();
 
         if (!lastPeriod || !lastPeriod.start) return { ovulationDay: null, fertileWindow: new DateRange(null, null) };
