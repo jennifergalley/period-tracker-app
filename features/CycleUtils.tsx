@@ -4,7 +4,16 @@ import { DateRangeList } from '@/features/DateRangeList';
 import { datePlusNDays } from '@/features/dateUtils';
 
 /**
- * Utility class for period and fertility calculations.
+ * Utility class for managing menstrual cycle tracking logic, including period logging,
+ * fertile window calculation, period prediction, and cycle day calculation.
+ *
+ * Provides static methods to:
+ * - Log period days or ranges, with optional auto-add functionality for missed periods.
+ * - Calculate the fertile window and ovulation day based on the last logged period.
+ * - Predict all period date ranges for the next year using cycle and period length.
+ * - Determine the current cycle day for a given date.
+ *
+ * All methods operate on a `DateRangeList` abstraction for managing period ranges.
  */
 export class CycleUtils {
     /**
@@ -147,6 +156,32 @@ export class CycleUtils {
 
         console.log("All predicted periods:", predicted);
         return predicted;
+    }
+
+    /**
+     * Calculates the current cycle day based on the provided period ranges and a specific date.
+     *
+     * @param periodRanges - A list of date ranges representing previous periods.
+     * @param date - The date for which to calculate the cycle day.
+     * @returns The cycle day as a 1-based number. Returns 0 if there are no period ranges or the last period is invalid.
+     */
+    static getCycleDay(periodRanges: DateRangeList, date: Date): number {
+        if (periodRanges.isEmpty()) return 0;
+
+        // Normalize the date to the start of the day
+        let startOfDate = new Date(date);
+        startOfDate.setHours(0, 0, 0, 0);
+
+        // Get the last period range
+        const lastPeriod = periodRanges.getLastRange();
+        if (!lastPeriod || !lastPeriod.start) return 0;
+
+        // Calculate the cycle day
+        const cycleStart = lastPeriod.start;
+        const cycleEnd = startOfDate;
+        const cycleLength = Math.floor((cycleEnd.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+
+        return cycleLength + 1; // Add 1 to make it 1-based
     }
 }
 

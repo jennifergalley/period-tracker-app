@@ -73,11 +73,21 @@ export function handleRemoveSymptom(
 
 // TODO: Can we not store the weight unit in the logs? I think just date: value would suffice
 export function handleLogWeight(
-  value: number,
+  value: number | undefined,
   unit: WeightUnit,
   today: Date,
   setWeightLogs: SetWeightLogs
 ) {
+  if (value === undefined) {
+    // Remove the log for today
+    setWeightLogs(prev => {
+      const { [toDateKey(today)]: _, ...rest } = prev;
+      return rest;
+    });
+    return;
+  }
+
+  // Add or update the log for today
   setWeightLogs(prev => ({ ...prev, [toDateKey(today)]: { value, unit } }));
 }
 

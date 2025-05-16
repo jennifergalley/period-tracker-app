@@ -11,8 +11,8 @@ export default function ActivityLog() {
   const { theme } = useTheme();
   const {
     periodRanges,
-    ovulationDay: appOvulationDay,
-    predictedFertileWindow: appFertileWindow,
+    predictedOvulationDay,
+    predictedFertileWindow,
     symptomLogs,
     weightLogs,
     allSymptoms,
@@ -40,6 +40,7 @@ export default function ActivityLog() {
   return (
     // --- Activity Log Scrollable Container ---
     <ScrollView style={[styles.logContainer, { backgroundColor: theme.background, borderTopColor: theme.border }]} contentContainerStyle={{ paddingBottom: 24 }}>
+      
       {/* --- Activity Log Heading --- */}
       <Text style={[styles.logHeading, { color: theme.text }]}>Activity Log</Text>
 
@@ -47,8 +48,8 @@ export default function ActivityLog() {
       {sortedDays.every(date => {
         const dStr = toDateKey(date);
         const isPeriod = periodRanges.containsDate(date);
-        const isOvulation = appOvulationDay && dStr === toDateKey(appOvulationDay);
-        const isFertile = appFertileWindow && appFertileWindow.containsDate(date);
+        const isOvulation = predictedOvulationDay && dStr === toDateKey(predictedOvulationDay);
+        const isFertile = predictedFertileWindow && predictedFertileWindow.containsDate(date);
         const symptoms = symptomLogs[dStr] || [];
         return !isPeriod && !isOvulation && !isFertile && symptoms.length === 0;
       }) && (
@@ -59,8 +60,8 @@ export default function ActivityLog() {
       {sortedDays.map(date => {
         const dStr = toDateKey(date);
         const isPeriod = periodRanges.containsDate(date);
-        const isOvulation = appOvulationDay && dStr === toDateKey(appOvulationDay);
-        const isFertile = appFertileWindow && appFertileWindow.containsDate(date);
+        const isOvulation = predictedOvulationDay && dStr === toDateKey(predictedOvulationDay);
+        const isFertile = predictedFertileWindow && predictedFertileWindow.containsDate(date);
         const symptoms = symptomLogs[dStr] || [];
         const weight = weightLogs[dStr];
         const textLog = textLogs ? textLogs[dStr] : undefined;
@@ -112,7 +113,7 @@ export default function ActivityLog() {
 };
 
 const styles = StyleSheet.create({
-  logContainer: { maxHeight: 300, marginTop: 8 },
+  logContainer: { marginTop: 8 },
   logHeading: { fontWeight: 'bold', fontSize: 18, marginVertical: 10, marginLeft: 12 },
   logItem: { borderBottomWidth: 1, paddingVertical: 10, paddingHorizontal: 12 },
   logDate: { fontWeight: 'bold', fontSize: 15 },

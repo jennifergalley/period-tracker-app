@@ -1,31 +1,25 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Button, Dimensions, PanResponder } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, PanResponder } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import { getDaysInMonth, getFirstDayOfWeek, isToday, toDateKey } from '@/features/dateUtils';
-import { handleDayPress } from '@/features/Handlers';
-import DayView from '@/components/DayView';
-import ActivityLog from '@/components/ActivityLog';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4;
 
-export default function CalendarView() {
-  const { theme, themeName } = useTheme();
+type CalendarViewProps = {
+  setSelectedDay: (d: Date) => void;
+  setDayModalVisible: (v: boolean) => void;
+};
+
+export default function CalendarView({ setSelectedDay, setDayModalVisible }: CalendarViewProps) {
+  const { theme } = useTheme();
   const {
-    weightLogs, setWeightLogs,
-    weightUnit,
-    periodRanges, setPeriodRanges,
-    symptomLogs, setSymptomLogs,
-    allSymptoms, setAllSymptoms,
-    autoAddPeriodDays,
+    periodRanges,
+    symptomLogs,
     showOvulation,
     showFertileWindow,
-    textLogs,
-    setTextLogs,
     predictedPeriods,
     predictedFertileWindow,
     predictedOvulationDay
@@ -46,7 +40,7 @@ export default function CalendarView() {
     if (predictedPeriods && predictedPeriods.containsDate(date)) return 'transparent';
     if (
       ovulationDayToShow &&
-      typeof ovulationDayToShow === 'object' &&      
+      typeof ovulationDayToShow === 'object' &&
       toDateKey(ovulationDayToShow) === dStr
     ) return theme.ovulation;
     if (fertileStartToShow && fertileEndToShow && date >= fertileStartToShow && date <= fertileEndToShow) return theme.fertile;
@@ -79,9 +73,6 @@ export default function CalendarView() {
   const days: (Date | null)[] = [];
   for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
-  
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [dayModalVisible, setDayModalVisible] = useState(false);
 
   // PanResponder for swipe gestures on the calendar grid
   const panResponder = useRef(
@@ -100,9 +91,7 @@ export default function CalendarView() {
   ).current;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
-      <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['left', 'right', 'bottom']}>
+    <View style={{ backgroundColor: '#181a20' }}>
         {/* --- Calendar Header (Month/Year, Navigation) --- */}
         <View style={styles.header}>
           <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
@@ -111,6 +100,7 @@ export default function CalendarView() {
           </Text>
           <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
         </View>
+
         {/* --- Calendar Legend --- */}
         <View style={[styles.legend, { flexWrap: 'wrap' }]}> 
           <View style={styles.legendItem}>
@@ -134,6 +124,7 @@ export default function CalendarView() {
             </View>
           )}
         </View>
+        
         {/* --- Weekday Row --- */}
         <View style={styles.weekRow}>
           {['Sun','Mon','Tues','Wed','Thu','Fri','Sat'].map((d, i) => (
@@ -142,6 +133,7 @@ export default function CalendarView() {
             </View>
           ))}
         </View>
+
         {/* --- Calendar Grid (Days) --- */}
         <View
           style={{ flexDirection: 'row', flexWrap: 'wrap', alignSelf: 'stretch' }}
@@ -151,9 +143,14 @@ export default function CalendarView() {
             <TouchableOpacity
               key={i}
               disabled={!item}
-              onPress={() => item && handleDayPress(item, setSelectedDay, setDayModalVisible)}
+              onPress={() => {
+                if (item) {
+                  setSelectedDay(item);
+                  setDayModalVisible(true);
+                }
+              }}
             >
-            <View style={[
+              <View style={[
                 styles.dayCell,
                 item && periodRanges.containsDate(item)
                   ? { backgroundColor: theme.period, borderColor: theme.period }
@@ -175,36 +172,6 @@ export default function CalendarView() {
             </TouchableOpacity>
           ))}
         </View>
-        {/* --- Activity Log Below Calendar --- */}
-        <View style={[styles.activityLog]}>          
-          <ActivityLog />
-        </View>
-        {/* --- Day Modal (DayView) --- */}
-        <Modal visible={dayModalVisible} transparent={false} animationType="slide" onRequestClose={() => setDayModalVisible(false)}>
-          <View style={{ flex: 1, backgroundColor: theme.background }}>
-            {selectedDay && (
-              <DayView
-                date={selectedDay}
-                isPeriod={periodRanges.containsDate(selectedDay)}
-                isFertile={!!(fertileStartToShow && fertileEndToShow && selectedDay >= fertileStartToShow && selectedDay <= fertileEndToShow)}
-                isOvulation={!!(ovulationDayToShow && toDateKey(selectedDay) === toDateKey(ovulationDayToShow))}
-              />
-            )}
-            <Button title="Close" onPress={() => setDayModalVisible(false)} />
-          </View>
-        </Modal>
-        {/* --- Floating Action Button for Today --- */}
-        <TouchableOpacity
-          style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
-          onPress={() => {
-            setSelectedDay(today);
-            setDayModalVisible(true);
-          }}
-          accessibilityLabel="Open today in Day View"
-        >
-          <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
     </View>
   );
 };
@@ -217,14 +184,12 @@ const styles = StyleSheet.create({
   navBtn: { fontSize: 20, padding: 8 },
   calendarGrid: { flexGrow: 1, alignSelf: 'stretch' },
   weekRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'stretch' },
-  weekDayCell: { width: DAY_CELL_WIDTH, alignItems: 'center', justifyContent: 'center', margin: 2  },
+  weekDayCell: { width: DAY_CELL_WIDTH, alignItems: 'center', justifyContent: 'center', margin: 2 },
   weekDay: { fontWeight: 'bold', textAlign: 'center' },
-  activityLog: { flexGrow: 0, flexShrink: 1, minHeight: 0 },
   dayCell: { width: DAY_CELL_WIDTH, height: DAY_CELL_WIDTH, margin: 2, alignItems: 'center', justifyContent: 'center', borderRadius: 16, borderWidth: 1 },
   dayText: { fontWeight: 'bold' },
   todayCell: {
     borderWidth: 2,
-    backgroundColor: undefined,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
@@ -237,26 +202,4 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', marginRight: 16, marginBottom: 4 },
   legendDot: { width: 16, height: 16, borderRadius: 8, marginRight: 6 },
   legendText: { fontSize: 16, fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { padding: 20, borderRadius: 10, width: 300, alignItems: 'center' },
-  input: { borderWidth: 1, borderRadius: 5, padding: 8, marginTop: 8, width: 200, textAlign: 'center' },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  fabText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    marginTop: -2,
-  },
 });

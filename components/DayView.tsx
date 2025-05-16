@@ -7,12 +7,11 @@ import { toDateKey } from '@/features/dateUtils';
 import {
   handleTogglePeriod,
   handleToggleSymptom,
-  handleAddSymptom,
   handleRemoveSymptom,
-  handleDayPress,
   handleLogWeight,
   handleLogText,
 } from '@/features/Handlers';
+import { CycleUtils } from '@/features/CycleUtils';
 
 type DayViewProps = {
   date: Date;
@@ -38,6 +37,7 @@ export default function DayView(props: DayViewProps) {
     symptomLogs,
     setSymptomLogs,
     allSymptoms,
+    setAllSymptoms,
     periodRanges,
     setPeriodRanges,
     autoAddPeriodDays, 
@@ -46,12 +46,17 @@ export default function DayView(props: DayViewProps) {
 
   const [showSymptoms, setShowSymptoms] = useState(true);
   const [showWeight, setShowWeight] = useState(true);
-  const [showToast, setShowToast] = useState(false);
 
   // Logs for this day
   const textLog = textLogs[toDateKey(date)] || '';
   const symptomLog = symptomLogs[toDateKey(date)] || [];
   const weightLog = weightLogs[toDateKey(date)];
+
+  // Temporary local state for weight input so we can update it in AppState after the user is done typing
+  const [weightInputValue, setWeightInputValue] = useState(weightLog !== undefined ? String(weightLog.value) : '');
+
+  // Compute cycle day
+  const cycleDay = CycleUtils.getCycleDay(periodRanges, date);
 
   // Add haptic feedback for long-press delete
   const triggerHaptic = () => {
@@ -69,6 +74,7 @@ export default function DayView(props: DayViewProps) {
         
         {/* --- Date and Cycle Status --- */}
         <Text style={[styles.date, { color: theme.text }]}>{date.toDateString()}</Text>
+        {cycleDay && <Text style={[styles.cycleDay, { color: theme.text, marginBottom: 4 }]}>Cycle Day: {cycleDay > 0 ? cycleDay : ''}</Text>}
         {isPeriod && <Text style={[styles.period, { color: theme.period }]}>Period Day</Text>}
         {isFertile && <Text style={[styles.fertile, { color: theme.fertile }]}>Fertile Window</Text>}
         {isOvulation && <Text style={[styles.ovulation, { color: theme.ovulation }]}>Ovulation Day</Text>}
@@ -130,13 +136,17 @@ export default function DayView(props: DayViewProps) {
               style={[styles.weightInput, { width: 100, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
               placeholder={weightUnit}
               placeholderTextColor={theme.legendText}
-              value={weightLog !== undefined ? String(weightLog.value) : ''}
-              onChangeText={weight => {
+              value={weightInputValue}
+              onChangeText={setWeightInputValue}
+              onBlur={() => {
+                // Only save when input is valid and not empty
+                const trimmed = weightInputValue.trim();
                 // Allow empty string to clear the log
-                if (weight === '') {
+                if (trimmed === '') {
                   handleLogWeight(undefined, weightUnit, date, setWeightLogs);
                 } else {
-                  const val = parseFloat(weight);
+                  const val = parseFloat(trimmed);
+                  console.log('Parsed weight:', trimmed, "to val:", val);
                   if (!isNaN(val)) {
                     handleLogWeight(val, weightUnit, date, setWeightLogs);
                   }
@@ -163,7 +173,6 @@ export default function DayView(props: DayViewProps) {
           returnKeyType="done"
         />
       </ScrollView>
-      )}
     </KeyboardAvoidingView>
   );
 };
@@ -171,6 +180,7 @@ export default function DayView(props: DayViewProps) {
 const styles = StyleSheet.create({
   container: { padding: 24, alignItems: 'center' },
   date: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
+  cycleDay: { fontWeight: 'bold', marginBottom: 8, fontSize: 18 },
   period: { fontWeight: 'bold', marginBottom: 4, fontSize: 18 },
   fertile: { fontWeight: 'bold', marginBottom: 4, fontSize: 18 },
   ovulation: { fontWeight: 'bold', marginBottom: 4, fontSize: 18 },
