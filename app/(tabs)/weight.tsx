@@ -5,6 +5,7 @@ import { useAppState } from '@/components/AppStateContext';
 import { filterAndSortWeightLogs, addOrUpdateWeightLog, deleteWeightLog } from '@/features/weightUtils';
 import { useTheme } from '@/components/Theme';
 import { toDateKey } from '@/features/dateUtils';
+import { CommonStyles } from '@/components/CommonStyles';
 
 const dateRanges = [
   { label: 'This Month', months: 1 },
@@ -49,6 +50,8 @@ export default function WeightTracker() {
   // Remove weight entry row from top, add Log Weight button
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}> 
+      <Text style={[CommonStyles.heading, { color: theme.text }]}>Weight Tracker</Text>
+
       {/* --- Log Weight Modal --- */}
       <Modal visible={showWeightModal} transparent animationType="slide" onRequestClose={() => setShowWeightModal(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowWeightModal(false)}>
@@ -194,7 +197,6 @@ export default function WeightTracker() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  heading: { fontSize: 22, fontWeight: 'bold', marginBottom: 12, alignSelf: 'center' },
   rangeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 8, flexWrap: 'wrap' },
   rangeBtn: { fontSize: 14, marginHorizontal: 8, paddingVertical: 4, paddingHorizontal: 10, borderRadius: 8 },
   rangeBtnSelected: { fontWeight: 'bold' },

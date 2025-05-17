@@ -5,6 +5,8 @@ import { useTheme } from '@/components/Theme';
 import * as FileSystem from 'expo-file-system';
 import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
 import { DateRangeList } from '@/features/DateRangeList';
+import { Header } from '@react-navigation/elements';
+import { CommonStyles } from '@/components/CommonStyles';
 
 export default function SettingsScreen () {
   const appState = useAppState();
@@ -31,7 +33,9 @@ export default function SettingsScreen () {
   }, [showSymptomAdded]);
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.background }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.background }}>      
+      <Text style={[CommonStyles.heading, { color: theme.text }]}>Settings</Text>
+    
 
       {/* --- Weight Unit Selection --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Preferred Unit</Text>

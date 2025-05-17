@@ -6,7 +6,6 @@ import { useTheme } from '@/components/Theme';
 import { toDateKey } from '@/features/dateUtils';
 import CalendarView from '@/components/CalendarView';
 import { Modal, Button, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import ActivityLog from '@/components/ActivityLog';
 
 export default function Calendar() {
@@ -33,9 +32,7 @@ export default function Calendar() {
   const fertileEndToShow = showFertileWindow ? predictedFertileWindow.end : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
-      <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
-    
+    <View style={{ flex: 1, backgroundColor: '#181a20' }}>   
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['left', 'right', 'bottom']}>
         
       {/* --- Calendar View --- */}

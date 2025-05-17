@@ -49,11 +49,11 @@ export default function TabLayout() {
                 },
           }}
         >
-          
           <Tabs.Screen
             name="calendar"
             options={{
               title: 'Calendar',
+              headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons name={focused ? 'calendar' : 'calendar-outline'} color={color} size={24}/>
               ),
@@ -63,6 +63,7 @@ export default function TabLayout() {
             name="weight"
             options={{
               title: 'Weight Tracker',
+              headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons name={focused ? 'barbell' : 'barbell-outline'} color={color} size={24}/>
               ),
@@ -72,6 +73,7 @@ export default function TabLayout() {
             name="settings"
             options={{
               title: 'Settings',
+              headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons name={focused ? 'cog' : 'cog-outline'} color={color} size={24}/>
               ),

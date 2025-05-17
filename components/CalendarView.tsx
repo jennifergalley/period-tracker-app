@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import { getDaysInMonth, getFirstDayOfWeek, isToday, toDateKey } from '@/features/dateUtils';
+import { CommonStyles } from '@/components/CommonStyles';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4;
@@ -94,11 +95,11 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
     <View style={{ backgroundColor: '#181a20' }}>
         {/* --- Calendar Header (Month/Year, Navigation) --- */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<'}</Text></TouchableOpacity>
-          <Text style={[styles.headerText, { color: theme.text }]}>
+          <TouchableOpacity onPress={prevMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'<  '}</Text></TouchableOpacity>
+          <Text style={[CommonStyles.heading, { color: theme.text }]}>
             {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
           </Text>
-          <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'>'}</Text></TouchableOpacity>
+          <TouchableOpacity onPress={nextMonth}><Text style={[styles.navBtn, { color: theme.text }]}>{'  >'}</Text></TouchableOpacity>
         </View>
 
         {/* --- Calendar Legend --- */}
