@@ -196,10 +196,17 @@ export default function WeightTracker() {
         <View style={styles.chartContainer}>
           <LineChart
             data={{
-              labels: logEntries.map(entry => {
-                // Show only month/day for brevity
+              labels: logEntries.map((entry, idx) => {
                 const d = entry.date;
-                return `${d.getMonth() + 1}/${d.getDate()}`;
+                if (logEntries.length < 6) {
+                  // Show month/day always for small datasets
+                  return `${d.getMonth() + 1}/${d.getDate()}`;
+                } else {
+                  // For larger datasets, only show label every Nth point
+                  // N is chosen so there are at most 5 labels
+                  const N = Math.ceil(logEntries.length / 5);
+                  return idx % N === 0 ? `${d.getMonth() + 1}/${d.getDate()}` : '';
+                }
               }),
               datasets: [
                 {
@@ -271,7 +278,7 @@ export default function WeightTracker() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'stretch' },
+  container: { flex: 1, alignItems: 'stretch', paddingTop: 0, padding: 16 },
   rangeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 8, flexWrap: 'wrap' },
   rangeBtn: { fontSize: 14, marginHorizontal: 8, paddingVertical: 4, paddingHorizontal: 10, borderRadius: 8 },
   rangeBtnSelected: { fontWeight: 'bold' },
