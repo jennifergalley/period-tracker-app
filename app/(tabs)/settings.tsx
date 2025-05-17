@@ -17,6 +17,7 @@ export default function SettingsScreen () {
     setTextLogs } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
   const { accentColor, setAccentColor } = useAppState();
+
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
   const [showSymptomAdded, setShowSymptomAdded] = useState(false);
@@ -95,7 +96,7 @@ export default function SettingsScreen () {
         {/* --- Add Custom Symptom Row --- */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
           <TextInput
-            style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8, fontSize: 24, textAlign: 'center', color: theme.inputText }}
+            style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8, fontSize: 20, textAlign: 'center', color: theme.inputText }}
             placeholder="😀"
             placeholderTextColor={theme.legendText}
             value={newSymptomEmoji}

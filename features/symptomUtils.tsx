@@ -11,6 +11,9 @@ export const DEFAULT_SYMPTOMS = [
   { name: 'Hunger', icon: '🍽️' },
   { name: 'Diarrhea', icon: '💩' },
   { name: 'Constipation', icon: '🚽' },
+  { name: 'Dehydration', icon: '🥤' },
+  { name: 'Irritable', icon: '🤬' },
+  { name: 'Depression', icon: '😭' },
+  { name: 'Spotting', icon: '🩸' },
   { name: 'Horny', icon: '😏' },
-  // Add more as needed
 ];

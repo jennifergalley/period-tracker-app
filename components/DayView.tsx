@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/components/Theme';
@@ -46,7 +46,24 @@ export default function DayView(props: DayViewProps) {
 
   const [showSymptoms, setShowSymptoms] = useState(true);
   const [showWeight, setShowWeight] = useState(true);
+  
+  // State for editing a symptom
+  const [editingSymptom, setEditingSymptom] = useState<{ name: string; icon: string } | null>(null);
+  const [editSymptomName, setEditSymptomName] = useState('');
+  const [editSymptomIcon, setEditSymptomIcon] = useState('');
 
+  const [newSymptom, setNewSymptom] = useState('');
+  const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
+  const [showSymptomAdded, setShowSymptomAdded] = useState(false);
+  const [showAppState, setShowAppState] = useState(false);
+
+  useEffect(() => {
+    if (showSymptomAdded) {
+      const timer = setTimeout(() => setShowSymptomAdded(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSymptomAdded]);
+  
   // Logs for this day
   const textLog = textLogs[toDateKey(date)] || '';
   const symptomLog = symptomLogs[toDateKey(date)] || [];
@@ -63,6 +80,13 @@ export default function DayView(props: DayViewProps) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
+  useEffect(() => {
+    if (editingSymptom) {
+      setNewSymptom(editingSymptom.name);
+      setNewSymptomEmoji(editingSymptom.icon);
+    }
+  }, [editingSymptom]);
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -74,7 +98,9 @@ export default function DayView(props: DayViewProps) {
         
         {/* --- Date and Cycle Status --- */}
         <Text style={[styles.date, { color: theme.text }]}>{date.toDateString()}</Text>
-        {cycleDay && <Text style={[styles.cycleDay, { color: theme.text, marginBottom: 4 }]}>Cycle Day: {cycleDay > 0 ? cycleDay : ''}</Text>}
+        {cycleDay > 0 && (
+          <Text style={[styles.cycleDay, { color: theme.text, marginBottom: 4 }]}>Cycle Day: {cycleDay}</Text>
+        )}
         {isPeriod && <Text style={[styles.period, { color: theme.period }]}>Period Day</Text>}
         {isFertile && <Text style={[styles.fertile, { color: theme.fertile }]}>Fertile Window</Text>}
         {isOvulation && <Text style={[styles.ovulation, { color: theme.ovulation }]}>Ovulation Day</Text>}
@@ -103,15 +129,21 @@ export default function DayView(props: DayViewProps) {
               <TouchableOpacity
                 key={symptom.name}
                 style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border }, 
-                  symptomLog.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]}
+                  symptomLog.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]
+                }
                 onPress={() => handleToggleSymptom(date, symptom.name, setSymptomLogs)}
                 onLongPress={() => {
                   triggerHaptic();
                   Alert.alert(
-                    'Remove Symptom',
-                    `Remove "${symptom.name}" from your symptom list? This will also remove it from any day it was logged.`,
+                    'Symptom Options',
+                    `Edit or remove "${symptom.name}"?`,
                     [
                       { text: 'Cancel', style: 'cancel' },
+                      { text: 'Edit', onPress: () => {
+                        setEditingSymptom({ name: symptom.name, icon: symptom.icon });
+                        setEditSymptomName(symptom.name);
+                        setEditSymptomIcon(symptom.icon);
+                      } },
                       { text: 'Remove', style: 'destructive', onPress: () => handleRemoveSymptom(symptom.name, setAllSymptoms, setSymptomLogs) },
                     ]
                   );
@@ -121,6 +153,101 @@ export default function DayView(props: DayViewProps) {
                 <Text style={[styles.symptomTextVertical, { color: theme.text }, symptomLog.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
               </TouchableOpacity>
             ))}
+
+            {/* --- Add/Edit Custom Symptom Row --- */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+              <TextInput
+                style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8, fontSize: 20, textAlign: 'center', color: theme.inputText }}
+                placeholder="😀"
+                placeholderTextColor={theme.legendText}
+                value={newSymptomEmoji}
+                onChangeText={text => setNewSymptomEmoji(text.slice(0, 2))}
+                maxLength={2}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TextInput
+                style={{ flex: 1, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border, borderWidth: 1, padding: 8, marginRight: 8 }}
+                placeholder="Add custom symptom"
+                placeholderTextColor={theme.legendText}
+                value={newSymptom}
+                onChangeText={setNewSymptom}
+                onSubmitEditing={() => {
+                  if (editingSymptom) {
+                    // Save edit
+                    const trimmedName = newSymptom.trim();
+                    const trimmedIcon = newSymptomEmoji.trim() || '📝';
+                    if (!trimmedName) return;
+                    setAllSymptoms(prev => prev.map(s =>
+                      s.name === (editingSymptom?.name ?? '') ? { name: trimmedName, icon: trimmedIcon } : s
+                    ));
+                    setEditingSymptom(null);
+                    setNewSymptom('');
+                    setNewSymptomEmoji('');
+                  } else if (newSymptom.trim()) {
+                    setAllSymptoms(prev => prev.some(s => s.name === newSymptom.trim())
+                      ? prev
+                      : [{ name: newSymptom.trim(), icon: newSymptomEmoji.trim() || '📝' }, ...prev]);
+                    setNewSymptom('');
+                    setNewSymptomEmoji('');
+                    setShowSymptomAdded(true);
+                  }
+                }}
+              />
+              {editingSymptom ? (
+                <>
+                  <TouchableOpacity
+                    style={{ backgroundColor: theme.accent, borderRadius: 8, paddingVertical: 12, paddingHorizontal: 16 }}
+                    onPress={() => {
+                      const trimmedName = newSymptom.trim();
+                      const trimmedIcon = newSymptomEmoji.trim() || '📝';
+                      if (!trimmedName) return;
+                      setAllSymptoms(prev => prev.map(s =>
+                        s.name === (editingSymptom?.name ?? '') ? { name: trimmedName, icon: trimmedIcon } : s
+                      ));
+                      setEditingSymptom(null);
+                      setNewSymptom('');
+                      setNewSymptomEmoji('');
+                    }}
+                  >
+                    <Text style={{ color: theme.background, fontWeight: 'bold' }}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ backgroundColor: theme.period, borderRadius: 8, paddingVertical: 12, paddingHorizontal: 16, marginLeft: 8 }}
+                    onPress={() => {
+                      setEditingSymptom(null);
+                      setNewSymptom('');
+                      setNewSymptomEmoji('');
+                    }}
+                  >
+                    <Text style={{ color: theme.background, fontWeight: 'bold' }}>Cancel</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <TouchableOpacity
+                  style={{ backgroundColor: theme.accent, borderRadius: 8, paddingVertical: 12, paddingHorizontal: 16 }}
+                  onPress={() => {
+                    if (newSymptom.trim()) {
+                      setAllSymptoms(prev => prev.some(s => s.name === newSymptom.trim())
+                        ? prev
+                        : [{ name: newSymptom.trim(), icon: newSymptomEmoji.trim() || '📝' }, ...prev]);
+                      setNewSymptom('');
+                      setNewSymptomEmoji('');
+                      setShowSymptomAdded(true);
+                    }
+                  }}
+                >
+                  <Text style={{ color: theme.background, fontWeight: 'bold' }}>Add</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* --- Symptom added confirmation --- */}
+            {showSymptomAdded && (
+              <View style={{ position: 'absolute', top: 60, alignSelf: 'center', backgroundColor: theme.accent, borderRadius: 8, padding: 12, zIndex: 100 }}>
+                <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Symptom added!</Text>
+              </View>
+            )}
           </View>
         )}
 
