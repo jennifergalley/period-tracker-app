@@ -5,7 +5,8 @@ export const CommonStyles = StyleSheet.create({
     color: '#4db8ff', // fallback, can be overridden inline
     fontSize: 22,
     fontWeight: 'bold',
-    marginTop: 10,
+    // Need to push the heading down to avoid overlap with the status bar
+    marginTop: 40,
     marginBottom: 10,
     textAlign: 'center',
     alignSelf: 'center',

@@ -9,7 +9,7 @@ import { Modal, Button, TouchableOpacity, Text, StyleSheet, View } from 'react-n
 import ActivityLog from '@/components/ActivityLog';
 
 export default function Calendar() {
-  const { theme, themeName } = useTheme();
+  const { theme } = useTheme();
   const {
     periodRanges,
     showOvulation,
@@ -32,7 +32,7 @@ export default function Calendar() {
   const fertileEndToShow = showFertileWindow ? predictedFertileWindow.end : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#181a20' }}>   
+    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['left', 'right', 'bottom']}>
         
       {/* --- Calendar View --- */}

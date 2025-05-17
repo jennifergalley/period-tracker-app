@@ -6,6 +6,10 @@ import { filterAndSortWeightLogs, addOrUpdateWeightLog, deleteWeightLog } from '
 import { useTheme } from '@/components/Theme';
 import { toDateKey } from '@/features/dateUtils';
 import { CommonStyles } from '@/components/CommonStyles';
+import { LineChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
 
 const dateRanges = [
   { label: 'This Month', months: 1 },
@@ -22,13 +26,16 @@ function formatDate(date: Date) {
 export default function WeightTracker() {
   const { theme } = useTheme();
   const { weightLogs, setWeightLogs, weightUnit } = useAppState();
+
+  const today = new Date();
+
   const [selectedRange, setSelectedRange] = useState(dateRanges[0]);
   const [customRange, setCustomRange] = useState<{ start: Date; end: Date } | null>(null);
-  const today = new Date();
   const [weightInput, setWeightInput] = useState('');
   const [logDate, setLogDate] = useState<Date>(today);
   const [originalLogDate, setOriginalLogDate] = useState<Date | null>(null); // Track original date for editing
   const [showWeightModal, setShowWeightModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Calculate startDate and endDate for filtering logs
   const startDate = customRange
@@ -84,11 +91,37 @@ export default function WeightTracker() {
               />
               <TouchableOpacity
                 style={[styles.dateBtn, { marginLeft: 12, backgroundColor: theme.accent }]}
-                onPress={() => {/* Date picker removed for web/native simplicity */}}
-                disabled
+                onPress={() => setShowDatePicker(true)}
               >
                 <Text style={[styles.dateBtnText, { color: theme.fabText }]}>{formatDate(logDate)}</Text>
               </TouchableOpacity>
+              {/* Date Picker Modal */}
+              {showDatePicker && (
+                Platform.OS === 'web' ? (
+                  <input
+                    type="date"
+                    style={{ marginLeft: 8, height: 40, borderRadius: 8, borderColor: theme.border, borderWidth: 1 }}
+                    value={logDate.toISOString().slice(0, 10)}
+                    onChange={e => {
+                      setLogDate(new Date(e.target.value + 'T00:00:00'));
+                      setShowDatePicker(false);
+                    }}
+                    onBlur={() => setShowDatePicker(false)}
+                    autoFocus
+                  />
+                ) : (
+                  <DateTimePicker
+                    value={logDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) setLogDate(selectedDate);
+                    }}
+                    maximumDate={today}
+                  />
+                )
+              )}
             </View>
             <View style={{ flexDirection: 'row', marginTop: 16 }}>
               {weightLogs[toDateKey(logDate)] && (
@@ -158,6 +191,48 @@ export default function WeightTracker() {
           </TouchableOpacity>
         ))}
       </View>
+      {/* --- Weight Line Chart --- */}
+      {logEntries.length > 1 && (
+        <View style={styles.chartContainer}>
+          <LineChart
+            data={{
+              labels: logEntries.map(entry => {
+                // Show only month/day for brevity
+                const d = entry.date;
+                return `${d.getMonth() + 1}/${d.getDate()}`;
+              }),
+              datasets: [
+                {
+                  data: logEntries.map(entry => entry.value),
+                  color: () => theme.accent, // optional
+                  strokeWidth: 2,
+                },
+              ],
+            }}
+            width={Dimensions.get('window').width - 32} // padding
+            height={180}
+            yAxisSuffix={` ${weightUnit}`}
+            chartConfig={{
+              backgroundColor: theme.background,
+              backgroundGradientFrom: theme.background,
+              backgroundGradientTo: theme.background,
+              decimalPlaces: 1,
+              color: (opacity = 1) => theme.accent,
+              labelColor: (opacity = 1) => theme.text,
+              propsForDots: {
+                r: '4',
+                strokeWidth: '2',
+                stroke: theme.accent,
+              },
+              propsForBackgroundLines: {
+                stroke: theme.border,
+              },
+            }}
+            bezier
+            style={{ borderRadius: 12, marginVertical: 8 }}
+          />
+        </View>
+      )}
       {/* --- Weight Log List --- */}
       <ScrollView>
         <Text style={[styles.logHeading, { color: theme.text }]}>Weight Log</Text>
@@ -174,7 +249,7 @@ export default function WeightTracker() {
             }}
           >
             <Text style={[styles.logDate, { color: theme.text }]}>{formatDate(entry.date)}</Text>
-            <Text style={[styles.logWeightBlue, { color: theme.accent }]}>{entry.value} {entry.unit}</Text>
+            <Text style={[styles.logWeightBlue, { color: theme.text }]}>{entry.value} {entry.unit}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -196,11 +271,11 @@ export default function WeightTracker() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, alignItems: 'stretch' },
   rangeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 8, flexWrap: 'wrap' },
   rangeBtn: { fontSize: 14, marginHorizontal: 8, paddingVertical: 4, paddingHorizontal: 10, borderRadius: 8 },
   rangeBtnSelected: { fontWeight: 'bold' },
-  chart: { marginVertical: 8 },
+  chartContainer: { marginVertical: 8, alignItems: 'center' },
   logHeading: { fontWeight: 'bold', fontSize: 18, marginVertical: 10 },
   logItem: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderColor: '#23242a', paddingVertical: 10, paddingHorizontal: 4 },
   logDate: { fontSize: 15 },
