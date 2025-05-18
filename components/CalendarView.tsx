@@ -92,7 +92,7 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
   ).current;
 
   return (
-    <View style={{ backgroundColor: '#181a20' }}>
+    <View style={{ backgroundColor: theme.background }}>
         {/* --- Calendar Header (Month/Year, Navigation) --- */}
         <View style={styles.header}>
           <TouchableOpacity onPress={prevMonth}><Text style={[CommonStyles.heading, { color: theme.text }]}>{'<  '}</Text></TouchableOpacity>
@@ -159,15 +159,15 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
                     ? { backgroundColor: 'transparent', borderColor: theme.period, borderWidth: 2 }
                     : { backgroundColor: item ? getDayColor(item) : 'transparent', borderColor: theme.border },
                 item && isToday(item) && styles.todayCell,
-                item && isToday(item) && { borderColor: theme.gold, shadowColor: theme.gold }
+                item && isToday(item) && { borderColor: theme.todayColor, shadowColor: theme.todayColor }
               ]}>
                 {item && (symptomLogs[toDateKey(item)]?.length > 0) && (
-                  <MaterialCommunityIcons name="note-outline" size={16} color={theme.gold} style={{ position: 'absolute', top: 4, right: 4 }} />
+                  <MaterialCommunityIcons name="note-outline" size={16} color={theme.todayColor} style={{ position: 'absolute', top: 4, right: 4 }} />
                 )}
                 <Text style={[
                   styles.dayText,
                   { color: theme.text },
-                  item && isToday(item) ? [styles.todayText, { color: theme.gold }] : null
+                  item && isToday(item) ? [styles.todayText, { color: theme.todayColor }] : null
                 ]}>{item ? item.getDate() : ''}</Text>
               </View>
             </TouchableOpacity>

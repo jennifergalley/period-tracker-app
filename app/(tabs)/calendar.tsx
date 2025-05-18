@@ -32,7 +32,7 @@ export default function Calendar() {
   const fertileEndToShow = showFertileWindow ? predictedFertileWindow.end : null;
 
   return (
-    <View style={[styles.container,  { flex: 1, backgroundColor: '#181a20' }]}>
+    <View style={[styles.container,  { flex: 1, backgroundColor: theme.background }]}>
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['left', 'right', 'bottom']}>
         
       {/* --- Calendar View --- */}
@@ -58,7 +58,7 @@ export default function Calendar() {
         setDayModalVisible(false);
         if (openedFrom === 'ActivityLogModal') setActivityLogModalVisible(true);
       }}>
-        <View style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={{ flex: 1, backgroundColor: theme.card }}>
           {selectedDay && (
             <DayView
               date={selectedDay}
@@ -67,10 +67,15 @@ export default function Calendar() {
               isOvulation={!!(ovulationDayToShow && toDateKey(selectedDay) === toDateKey(ovulationDayToShow))}
             />
           )}
-          <Button title="Close" onPress={() => {
-            setDayModalVisible(false);
-            if (openedFrom === 'ActivityLogModal') setActivityLogModalVisible(true);
-          }} />
+          <TouchableOpacity
+            style={{ backgroundColor: theme.card, borderRadius: 8, paddingVertical: 16, paddingHorizontal: 16, alignSelf: 'stretch', marginHorizontal: 24 }}
+            onPress={() => {
+              setDayModalVisible(false);
+              if (openedFrom === 'ActivityLogModal') setActivityLogModalVisible(true);
+            }}
+          >
+            <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Modal>      
 
@@ -79,7 +84,7 @@ export default function Calendar() {
         setActivityLogModalVisible(false);
         setOpenedFrom('CalendarView');
       }}>
-        <View style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={{ flex: 1, backgroundColor: theme.card }}>
           <ActivityLog 
             onDayPress={date => {
               setSelectedDay(date);
@@ -89,10 +94,15 @@ export default function Calendar() {
             }}
             onHeadingPress={() => {}}
           />
-          <Button title="Close" onPress={() => {
-            setActivityLogModalVisible(false);
-            setOpenedFrom('CalendarView');
-          }} />
+          <TouchableOpacity
+            style={{ backgroundColor: theme.card, borderRadius: 8, paddingVertical: 16, paddingHorizontal: 16, alignSelf: 'stretch', marginHorizontal: 24 }}
+            onPress={() => {
+              setActivityLogModalVisible(false);
+              setOpenedFrom('CalendarView');
+            }}
+          >
+            <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 

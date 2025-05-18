@@ -80,7 +80,7 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
 
               {/* --- Badges for Period/Fertile/Ovulation/Predicted Period --- */}
               <View style={styles.logBadges}>
-                {isPeriod && <Text style={[styles.periodBadge, { backgroundColor: theme.period, color: theme.text }]}>Period</Text>}
+                {isPeriod && <Text style={[styles.periodBadge, { backgroundColor: theme.period, color: theme.fabText }]}>Period</Text>}
                 {isFertile && <Text style={[styles.fertileBadge, { backgroundColor: theme.fertile, color: theme.background }]}>Fertile</Text>}
                 {isOvulation && <Text style={[styles.ovulationBadge, { backgroundColor: theme.ovulation, color: theme.background }]}>Ovulation</Text>}
               </View>

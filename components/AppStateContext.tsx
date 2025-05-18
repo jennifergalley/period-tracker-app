@@ -15,33 +15,47 @@ export interface Symptom {
 }
 
 export interface AppState {
-  weightLogs: { [date: string]: WeightLog };
-  setWeightLogs: React.Dispatch<React.SetStateAction<{ [date: string]: WeightLog }>>;
+  // State variables / Generic app behavior
   weightUnit: WeightUnit;
   setWeightUnit: (u: WeightUnit) => void;
-  periodRanges: DateRangeList;
-  setPeriodRanges: React.Dispatch<React.SetStateAction<DateRangeList>>;
-  symptomLogs: { [date: string]: string[] };
-  setSymptomLogs: React.Dispatch<React.SetStateAction<{ [date: string]: string[] }>>;
+
   allSymptoms: { name: string; icon: string }[];
   setAllSymptoms: React.Dispatch<React.SetStateAction<Symptom[]>>;
+
   autoAddPeriodDays: boolean;
   setAutoAddPeriodDays: React.Dispatch<React.SetStateAction<boolean>>;
+
   typicalPeriodLength: number;
   setTypicalPeriodLength: React.Dispatch<React.SetStateAction<number>>;
+
   showOvulation: boolean;
   setShowOvulation: React.Dispatch<React.SetStateAction<boolean>>;
+
   showFertileWindow: boolean;
   setShowFertileWindow: React.Dispatch<React.SetStateAction<boolean>>;
+
   themeName: string;
   setThemeName: (theme: string) => void;
-  accentColor: string;  setAccentColor: (color: string) => void;
+
+  // User logs
+  weightLogs: { [date: string]: WeightLog };
+  setWeightLogs: React.Dispatch<React.SetStateAction<{ [date: string]: WeightLog }>>;
+
+  periodRanges: DateRangeList;
+  setPeriodRanges: React.Dispatch<React.SetStateAction<DateRangeList>>;
+
+  symptomLogs: { [date: string]: string[] };
+  setSymptomLogs: React.Dispatch<React.SetStateAction<{ [date: string]: string[] }>>;
+
   textLogs: { [date: string]: string };
   setTextLogs: React.Dispatch<React.SetStateAction<{ [date: string]: string }>>;
+
   predictedFertileWindow: DateRange;
   setPredictedFertileWindow: React.Dispatch<React.SetStateAction<DateRange>>;
+
   predictedOvulationDay: Date | null;
   setPredictedOvulationDay: React.Dispatch<React.SetStateAction<Date | null>>;
+
   predictedPeriods: DateRangeList;
   setPredictedPeriods: React.Dispatch<React.SetStateAction<DateRangeList>>;
 }
@@ -81,19 +95,21 @@ const storage = {
   }
 };
 
-export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {  
-  const [weightLogs, setWeightLogs] = useState<{ [date: string]: WeightLog }>({});
+export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // State variables / Generic app behavior
   const [weightUnit, setWeightUnit] = useState<WeightUnit>('lbs');
-  const [periodRanges, setPeriodRanges] = useState<DateRangeList>(new DateRangeList());
-  const [symptomLogs, setSymptomLogs] = useState<{ [date: string]: string[] }>({});
   const [allSymptoms, setAllSymptoms] = useState(DEFAULT_SYMPTOMS);
   const [autoAddPeriodDays, setAutoAddPeriodDays] = useState<boolean>(true);
   const [typicalPeriodLength, setTypicalPeriodLength] = useState<number>(5);
   const [showOvulation, setShowOvulation] = useState<boolean>(true);
   const [showFertileWindow, setShowFertileWindow] = useState<boolean>(true);  
   const [themeName, setThemeName] = useState<string>('dark');
-  const [accentColor, setAccentColor] = useState<string>('#ffd33d');
-  const [textLogs, setTextLogs] = useState<{ [date: string]: string }>({});  
+
+  // User logs
+  const [weightLogs, setWeightLogs] = useState<{ [date: string]: WeightLog }>({});
+  const [periodRanges, setPeriodRanges] = useState<DateRangeList>(new DateRangeList());
+  const [symptomLogs, setSymptomLogs] = useState<{ [date: string]: string[] }>({});
+  const [textLogs, setTextLogs] = useState<{ [date: string]: string }>({});
   const [predictedFertileWindow, setPredictedFertileWindow] = useState<DateRange>(new DateRange(null, null));
   const [predictedOvulationDay, setPredictedOvulationDay] = useState<Date | null>(null);
   const [predictedPeriods, setPredictedPeriods] = useState<DateRangeList>(new DateRangeList());
@@ -117,7 +133,6 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (typeof data.showOvulation === 'boolean') setShowOvulation(data.showOvulation);
       if (typeof data.showFertileWindow === 'boolean') setShowFertileWindow(data.showFertileWindow);      
       if (data.themeName) setThemeName(data.themeName);
-      if (data.accentColor) setAccentColor(data.accentColor);
       if (data.textLogs) setTextLogs(data.textLogs);
       if (data.predictedFertileWindow) {
         const predictedFertileWindow = DateRange.fromJSON(data.predictedFertileWindow);
@@ -134,17 +149,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Save state to storage whenever any part changes
   useEffect(() => {
     const data = { 
-      weightLogs, 
       weightUnit,
-      periodRanges,
-      symptomLogs, 
       allSymptoms, 
       autoAddPeriodDays, 
       typicalPeriodLength, 
       showOvulation, 
       showFertileWindow, 
-      themeName, 
-      accentColor, 
+      themeName,
+      weightLogs, 
+      periodRanges,
+      symptomLogs, 
       textLogs,
       predictedFertileWindow, 
       predictedOvulationDay,
@@ -152,22 +166,21 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
     storage.save(data);
   }, [
-    weightLogs, 
     weightUnit, 
-    periodRanges, 
-    symptomLogs, 
     allSymptoms, 
     autoAddPeriodDays, 
     typicalPeriodLength, 
     showOvulation, 
     showFertileWindow, 
-    themeName, 
-    accentColor,
+    themeName,
+    weightLogs, 
+    periodRanges, 
+    symptomLogs, 
     textLogs,
     predictedFertileWindow, 
     predictedOvulationDay,
     predictedPeriods
-  ]);  
+  ]);
   
   // Compute predictions when a new period is logged
   React.useEffect(() => {    
@@ -183,17 +196,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   return (
     <AppStateContext.Provider value={{
-      weightLogs, setWeightLogs,
       weightUnit, setWeightUnit,
-      periodRanges, setPeriodRanges,
-      symptomLogs, setSymptomLogs,
       allSymptoms, setAllSymptoms,
       autoAddPeriodDays, setAutoAddPeriodDays,
       typicalPeriodLength, setTypicalPeriodLength,
       showOvulation, setShowOvulation,
       showFertileWindow, setShowFertileWindow,
       themeName, setThemeName,
-      accentColor, setAccentColor,
+      weightLogs, setWeightLogs,
+      periodRanges, setPeriodRanges,
+      symptomLogs, setSymptomLogs,
       textLogs, setTextLogs,
       predictedFertileWindow, setPredictedFertileWindow,
       predictedOvulationDay, setPredictedOvulationDay,

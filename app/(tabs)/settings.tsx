@@ -17,7 +17,6 @@ export default function SettingsScreen () {
     showFertileWindow, setShowFertileWindow,
     setTextLogs } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
-  const { accentColor, setAccentColor } = useAppState();
 
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
@@ -36,7 +35,7 @@ export default function SettingsScreen () {
       <Text style={[CommonStyles.heading, { color: theme.text }]}>Settings</Text>
     
       {/* --- Weight Unit Selection --- */}
-      <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Preferred Unit</Text>
+      <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Weight Unit</Text>
       <View style={{ flexDirection: 'row', marginTop: 16 }}>
         <TouchableOpacity style={{ backgroundColor: weightUnit === 'kg' ? theme.accent : theme.card, borderRadius: 8, padding: 12, marginRight: 12 }} onPress={() => setWeightUnit('kg')}>
           <Text style={{ color: weightUnit === 'kg' ? theme.fabText : theme.text, fontWeight: 'bold' }}>kg</Text>
@@ -47,107 +46,57 @@ export default function SettingsScreen () {
       </View>
 
       {/* --- Theme Switcher --- */}
-      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Preferred Theme</Text>
-      <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>App Theme</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16, justifyContent: 'center' }}>
         <TouchableOpacity
-          style={{ backgroundColor: themeName === 'dark' ? theme.accent : theme.card, borderRadius: 8, padding: 12, marginRight: 12 }}
+          style={{ backgroundColor: themeName === 'dark' ? theme.accent : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
           onPress={() => setThemeName('dark')}
         >
           <Text style={{ color: themeName === 'dark' ? theme.fabText : theme.text, fontWeight: 'bold' }}>Dark</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ backgroundColor: themeName === 'light' ? theme.accent : theme.card, borderRadius: 8, padding: 12 }}
+          style={{ backgroundColor: themeName === 'light' ? theme.accent : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
           onPress={() => setThemeName('light')}
         >
           <Text style={{ color: themeName === 'light' ? theme.fabText : theme.text, fontWeight: 'bold' }}>Light</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={{ backgroundColor: themeName === 'blue' ? '#1976d2' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('blue')}
+        >
+          <Text style={{ color: themeName === 'blue' ? '#fff' : theme.text, fontWeight: 'bold' }}>Blue</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ backgroundColor: themeName === 'pink' ? '#e91e63' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('pink')}
+        >
+          <Text style={{ color: themeName === 'pink' ? '#fff' : theme.text, fontWeight: 'bold' }}>Pink</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ backgroundColor: themeName === 'mint' ? '#2ec4b6' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('mint')}
+        >
+          <Text style={{ color: themeName === 'mint' ? '#fff' : theme.text, fontWeight: 'bold' }}>Mint</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ backgroundColor: themeName === 'purple' ? '#8f5cff' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('purple')}
+        >
+          <Text style={{ color: themeName === 'purple' ? '#fff' : theme.text, fontWeight: 'bold' }}>Purple</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ backgroundColor: themeName === 'sunny' ? '#ffb300' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('sunny')}
+        >
+          <Text style={{ color: themeName === 'sunny' ? '#fff' : theme.text, fontWeight: 'bold' }}>Sunny</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ backgroundColor: themeName === 'gothic' ? '#ff1744' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('gothic')}
+        >
+          <Text style={{ color: themeName === 'gothic' ? '#fff' : theme.text, fontWeight: 'bold' }}>Gothic</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* --- Accent Color Picker --- */}
-      <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Accent Color</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-        <TextInput
-          style={{
-            height: 40,
-            width: 120,
-            borderRadius: 8,
-            backgroundColor: theme.inputBg,
-            color: theme.inputText,
-            borderColor: theme.border,
-            borderWidth: 1,
-            padding: 8,
-            marginRight: 12,
-            fontFamily: 'monospace',
-            fontSize: 16,
-          }}
-          value={accentColor}
-          onChangeText={setAccentColor}
-          placeholder="#4db8ff"
-          placeholderTextColor={theme.legendText}
-          maxLength={9}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: accentColor, borderWidth: 1, borderColor: theme.border }} />
-      </View>
-
-      {/* --- Custom Symptoms Management --- */}
-      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Add Custom Symptoms</Text>
-      <View style={{ width: '90%', marginBottom: 16 }}>
-
-        {/* --- Add Custom Symptom Row --- */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-          <TextInput
-            style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8, fontSize: 20, textAlign: 'center', color: theme.inputText }}
-            placeholder="😀"
-            placeholderTextColor={theme.legendText}
-            value={newSymptomEmoji}
-            onChangeText={text => setNewSymptomEmoji(text.slice(0, 2))}
-            maxLength={2}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          <TextInput
-            style={{ flex: 1, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border, borderWidth: 1, padding: 8, marginRight: 8 }}
-            placeholder="Add custom symptom"
-            placeholderTextColor={theme.legendText}
-            value={newSymptom}
-            onChangeText={setNewSymptom}
-            onSubmitEditing={() => {
-              if (newSymptom.trim()) {
-                setAllSymptoms(prev => prev.some(s => s.name === newSymptom.trim())
-                  ? prev
-                  : [{ name: newSymptom.trim(), icon: newSymptomEmoji.trim() || '📝' }, ...prev]);
-                setNewSymptom('');
-                setNewSymptomEmoji('');
-                setShowSymptomAdded(true);
-              }
-            }}
-          />
-          <TouchableOpacity
-            style={{ backgroundColor: theme.accent, borderRadius: 8, paddingVertical: 12, paddingHorizontal: 16 }}
-            onPress={() => {
-              if (newSymptom.trim()) {
-                setAllSymptoms(prev => prev.some(s => s.name === newSymptom.trim())
-                  ? prev
-                  : [{ name: newSymptom.trim(), icon: newSymptomEmoji.trim() || '📝' }, ...prev]);
-                setNewSymptom('');
-                setNewSymptomEmoji('');
-                setShowSymptomAdded(true);
-              }
-            }}
-          >
-            <Text style={{ color: theme.background, fontWeight: 'bold' }}>Add</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* --- Symptom added confirmation --- */}
-      {showSymptomAdded && (
-        <View style={{ position: 'absolute', top: 60, alignSelf: 'center', backgroundColor: theme.accent, borderRadius: 8, padding: 12, zIndex: 100 }}>
-          <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Symptom added!</Text>
-        </View>
-      )}
 
       {/* --- Period Logging Preference --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Period Logging</Text>
@@ -209,15 +158,16 @@ export default function SettingsScreen () {
         />
       </View>
 
+      {/* --- Show App Storage --- */}
         <TouchableOpacity onPress={() => setShowAppState(s => !s)} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
           <Text style={{ color: theme.accent, fontWeight: 'bold', fontSize: 16, marginRight: 8 }}>
             {showAppState ? '▼' : '▶'}
           </Text>
-          <Text style={{ color: theme.text, fontSize: 15, fontWeight: 'bold'  }}>(DEBUG) {showAppState ? 'Hide' : 'Show'} App State</Text>
+          <Text style={{ color: theme.text, fontSize: 15, fontWeight: 'bold'  }}>{showAppState ? 'Hide' : 'Show'} App Storage</Text>
         </TouchableOpacity>
         {showAppState && (
-          <View style={styles.stateBox}>
-            <Text style={styles.stateText} selectable>
+          <View style={[styles.stateBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.stateText, { color: theme.text }]} selectable>
               {JSON.stringify(appState, (key, value) => {
                 if (typeof value === 'function') return undefined;
                 return value;
@@ -293,7 +243,6 @@ const styles = StyleSheet.create({
   },
   stateBox: {
     marginTop: 12,
-    backgroundColor: '#333',
     borderRadius: 8,
     padding: 12,
     width: '100%',

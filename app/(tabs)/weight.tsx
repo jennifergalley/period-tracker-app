@@ -100,7 +100,7 @@ export default function WeightTracker() {
                 Platform.OS === 'web' ? (
                   <input
                     type="date"
-                    style={{ marginLeft: 8, height: 40, borderRadius: 8, borderColor: theme.border, borderWidth: 1 }}
+                    style={{ marginLeft: 8, height: 40, borderRadius: 8, borderColor: theme.border, borderWidth: 1, background: theme.datePicker === 'dark' ? '#23242a' : '#fff', color: theme.datePicker === 'dark' ? '#fff' : '#181a20' }}
                     value={logDate.toISOString().slice(0, 10)}
                     onChange={e => {
                       setLogDate(new Date(e.target.value + 'T00:00:00'));
@@ -113,7 +113,8 @@ export default function WeightTracker() {
                   <DateTimePicker
                     value={logDate}
                     mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    display={theme.datePicker === 'dark' ? 'spinner' : (Platform.OS === 'ios' ? 'spinner' : 'default')}
+                    themeVariant={theme.datePicker as 'dark' | 'light'}
                     onChange={(event, selectedDate) => {
                       setShowDatePicker(false);
                       if (selectedDate) setLogDate(selectedDate);
@@ -176,14 +177,14 @@ export default function WeightTracker() {
             <Text
               style={[
                 styles.rangeBtn,
+                { color: theme.text },
                 selectedRange.label === range.label && [
                   styles.rangeBtnSelected,
                   {
                     backgroundColor: theme.accent,
-                    color: theme.text,
+                    color: theme.fabText,
                   },
                 ],
-                { color: theme.text },
               ]}
             >
               {range.label}
