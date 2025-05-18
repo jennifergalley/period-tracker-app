@@ -1,7 +1,7 @@
 import { CycleUtils } from '@/features/CycleUtils';
 import type { WeightUnit } from '@/components/AppStateContext';
 import { DateRangeList } from '@/features/DateRangeList';
-import { toDateKey } from '@/features/dateUtils';
+import { toDateKey } from '@/features/DateUtils';
 
 // Types for period range and symptom
 type PeriodRanges = DateRangeList;

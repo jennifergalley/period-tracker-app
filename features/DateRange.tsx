@@ -1,4 +1,4 @@
-import { startOfDay } from "@/features/dateUtils";
+import { startOfDay } from "@/features/DateUtils";
 
 /**
  * Class for managing ranges of dates.

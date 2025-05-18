@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import DayView from '@/components/DayView';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
-import { toDateKey } from '@/features/dateUtils';
+import { toDateKey } from '@/features/DateUtils';
 import CalendarView from '@/components/CalendarView';
 import { Modal, Button, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import ActivityLog from '@/components/ActivityLog';

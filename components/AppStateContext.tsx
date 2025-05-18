@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
+import { DEFAULT_SYMPTOMS } from '@/features/SymptomUtils';
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 import { DateRange } from '@/features/DateRange';
 import { DateRangeList } from '@/features/DateRangeList';
 import { CycleUtils } from '@/features/CycleUtils';
-import { toDateKey } from '@/features/dateUtils';
 
 // Types
 export type WeightUnit = 'kg' | 'lbs';

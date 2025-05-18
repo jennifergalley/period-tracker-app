@@ -3,9 +3,8 @@ import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Swit
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import * as FileSystem from 'expo-file-system';
-import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
+import { DEFAULT_SYMPTOMS } from '@/features/SymptomUtils';
 import { DateRangeList } from '@/features/DateRangeList';
-import { Header } from '@react-navigation/elements';
 import { CommonStyles } from '@/components/CommonStyles';
 
 export default function SettingsScreen () {
@@ -36,7 +35,6 @@ export default function SettingsScreen () {
     <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.background }}>      
       <Text style={[CommonStyles.heading, { color: theme.text }]}>Settings</Text>
     
-
       {/* --- Weight Unit Selection --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginBottom: 8 }}>Preferred Unit</Text>
       <View style={{ flexDirection: 'row', marginTop: 16 }}>

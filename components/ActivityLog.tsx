@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/components/Theme';
 import { useAppState } from '@/components/AppStateContext';
-import { DEFAULT_SYMPTOMS } from '@/features/symptomUtils';
+import { DEFAULT_SYMPTOMS } from '@/features/SymptomUtils';
 import { Ionicons } from '@expo/vector-icons';
-import { formatDate } from '@/features/dateUtils';
-import { toDateKey } from '@/features/dateUtils';
+import { formatDate } from '@/features/DateUtils';
+import { toDateKey } from '@/features/DateUtils';
 
 export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress?: (date: Date) => void, onHeadingPress?: () => void }) {
   const { theme } = useTheme();

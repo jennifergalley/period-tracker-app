@@ -15,5 +15,6 @@ export const DEFAULT_SYMPTOMS = [
   { name: 'Irritable', icon: '🤬' },
   { name: 'Depression', icon: '😭' },
   { name: 'Spotting', icon: '🩸' },
+  { name: 'Back Pain', icon: '💢' },
   { name: 'Horny', icon: '😏' },
 ];

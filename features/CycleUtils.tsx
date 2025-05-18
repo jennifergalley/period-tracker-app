@@ -1,7 +1,7 @@
 // Utility functions for period and fertility calculations
 import { DateRange } from '@/features/DateRange';
 import { DateRangeList } from '@/features/DateRangeList';
-import { datePlusNDays } from '@/features/dateUtils';
+import { datePlusNDays } from '@/features/DateUtils';
 
 /**
  * Utility class for managing menstrual cycle tracking logic, including period logging,

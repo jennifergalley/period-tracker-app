@@ -1,5 +1,5 @@
 // Utility functions for weight log management
-import { toDateKey } from '@/features/dateUtils';
+import { toDateKey } from '@/features/DateUtils';
 
 function isAfter(date: Date, compareDate: Date) {
   return date.getTime() > compareDate.getTime();

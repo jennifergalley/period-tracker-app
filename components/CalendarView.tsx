@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, PanResponder } fr
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
-import { getDaysInMonth, getFirstDayOfWeek, isToday, toDateKey } from '@/features/dateUtils';
+import { getDaysInMonth, getFirstDayOfWeek, isToday, toDateKey } from '@/features/DateUtils';
 import { CommonStyles } from '@/components/CommonStyles';
 
 const SCREEN_WIDTH = Dimensions.get('window').width - 32; // Adjust for padding

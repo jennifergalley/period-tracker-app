@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/components/Theme';
 import { useAppState } from '@/components/AppStateContext';
-import { toDateKey } from '@/features/dateUtils';
+import { toDateKey } from '@/features/DateUtils';
 import {
   handleTogglePeriod,
   handleToggleSymptom,
