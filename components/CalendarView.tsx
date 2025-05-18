@@ -6,7 +6,7 @@ import { useTheme } from '@/components/Theme';
 import { getDaysInMonth, getFirstDayOfWeek, isToday, toDateKey } from '@/features/dateUtils';
 import { CommonStyles } from '@/components/CommonStyles';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_WIDTH = Dimensions.get('window').width - 32; // Adjust for padding
 const DAY_CELL_WIDTH = Math.floor(SCREEN_WIDTH / 7) - 4;
 
 type CalendarViewProps = {
@@ -108,14 +108,14 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
             <View style={[styles.legendDot, { backgroundColor: theme.period }]} />
             <Text style={[styles.legendText, { color: theme.legendText }]}>Period</Text>
           </View>
-          <View style={styles.legendItem}>
+          {/* <View style={styles.legendItem}>
             <View style={[styles.legendDot, { borderColor: theme.period, borderWidth: 2, backgroundColor: 'transparent' }]} />
             <Text style={[styles.legendText, { color: theme.legendText }]}>Predicted Period</Text>
-          </View>
+          </View> */}
           {showFertileWindow && (
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: theme.fertile }]} />
-              <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile Window</Text>
+              <Text style={[styles.legendText, { color: theme.legendText }]}>Fertile</Text>
             </View>
           )}
           {showOvulation && (
@@ -179,7 +179,6 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'stretch' },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, justifyContent: 'center', marginTop: 0 },
   headerText: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 16, textAlign: 'center' },
   navBtn: { fontSize: 20, padding: 8 },
@@ -202,5 +201,5 @@ const styles = StyleSheet.create({
   legend: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8, justifyContent: 'center', flexWrap: 'wrap' },
   legendItem: { flexDirection: 'row', alignItems: 'center', marginRight: 16, marginBottom: 4 },
   legendDot: { width: 16, height: 16, borderRadius: 8, marginRight: 6 },
-  legendText: { fontSize: 16, fontWeight: 'bold' },
+  legendText: { fontSize: 12, fontWeight: 'bold' },
 });

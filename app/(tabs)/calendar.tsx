@@ -32,7 +32,7 @@ export default function Calendar() {
   const fertileEndToShow = showFertileWindow ? predictedFertileWindow.end : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#181a20' }}>
+    <View style={[styles.container,  { flex: 1, backgroundColor: '#181a20' }]}>
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['left', 'right', 'bottom']}>
         
       {/* --- Calendar View --- */}
@@ -113,6 +113,7 @@ export default function Calendar() {
 };
 
 const styles = StyleSheet.create({
+  container: { flex: 1, alignItems: 'stretch', paddingTop: 0, padding: 16 },
   activityLog: { flexGrow: 0, flexShrink: 1, minHeight: 0, marginTop: 0, paddingTop: 0 },
   fab: {
     position: 'absolute',

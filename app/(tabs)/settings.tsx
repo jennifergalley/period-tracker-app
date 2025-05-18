@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#25292e',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 16,
   },
   text: {
     color: '#fff',

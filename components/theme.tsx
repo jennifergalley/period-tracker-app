@@ -9,7 +9,7 @@ export const themes = {
     accent: '#4db8ff',
     period: '#ff5c8a',
     fertile: '#4db8ff',
-    ovulation: '#ffb6c1',
+    ovulation: '#9b59b6',
     border: '#333',
     gold: '#ffd166',
     error: '#ff5c5c',
