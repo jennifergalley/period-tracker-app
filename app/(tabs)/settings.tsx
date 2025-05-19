@@ -18,8 +18,6 @@ export default function SettingsScreen () {
     setTextLogs } = useAppState();
   const { theme, themeName, setThemeName } = useTheme();
 
-  const [newSymptom, setNewSymptom] = useState('');
-  const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
   const [showSymptomAdded, setShowSymptomAdded] = useState(false);
   const [showAppState, setShowAppState] = useState(false);
 
@@ -230,15 +228,8 @@ export default function SettingsScreen () {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#25292e',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
   text: {
-    color: '#fff',
+    color: '#fff', // To be replaced with theme.text
     fontSize: 16,
   },
   stateBox: {
@@ -249,7 +240,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   stateText: {
-    color: '#ffd33d',
+    color: '#fff', // To be replaced with theme.text
     fontSize: 13,
     fontFamily: 'monospace',
   },

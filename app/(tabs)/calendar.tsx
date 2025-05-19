@@ -7,6 +7,7 @@ import { toDateKey } from '@/features/DateUtils';
 import CalendarView from '@/components/CalendarView';
 import { Modal, Button, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import ActivityLog from '@/components/ActivityLog';
+import { CommonStyles } from '@/components/CommonStyles';
 
 export default function Calendar() {
   const { theme } = useTheme();
@@ -32,7 +33,7 @@ export default function Calendar() {
   const fertileEndToShow = showFertileWindow ? predictedFertileWindow.end : null;
 
   return (
-    <View style={[styles.container,  { flex: 1, backgroundColor: theme.background }]}>
+    <View style={[CommonStyles.container, { backgroundColor: theme.background }]}> 
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['left', 'right', 'bottom']}>
         
       {/* --- Calendar View --- */}
@@ -105,43 +106,23 @@ export default function Calendar() {
           </TouchableOpacity>
         </View>
       </Modal>
+    </SafeAreaView>
 
       {/* --- Floating Action Button for Today --- */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
+        style={[CommonStyles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
         onPress={() => {
           setSelectedDay(today);
           setDayModalVisible(true);
         }}
         accessibilityLabel="Open today in Day View"
       >
-        <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
+        <Text style={[CommonStyles.fabText, { color: theme.fabText }]}>+</Text>
       </TouchableOpacity>
-    </SafeAreaView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'stretch', paddingTop: 0, padding: 16 },
   activityLog: { flexGrow: 0, flexShrink: 1, minHeight: 0, marginTop: 0, paddingTop: 0 },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  fabText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    marginTop: -2,
-  },
 });

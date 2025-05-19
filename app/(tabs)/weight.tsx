@@ -56,7 +56,7 @@ export default function WeightTracker() {
 
   // Remove weight entry row from top, add Log Weight button
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}> 
+    <View style={[CommonStyles.container, { backgroundColor: theme.background }]}> 
       <Text style={[CommonStyles.heading, { color: theme.text }]}>Weight Tracker</Text>
 
       {/* --- Log Weight Modal --- */}
@@ -261,9 +261,10 @@ export default function WeightTracker() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      
       {/* --- Floating Action Button to Add Weight Log --- */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
+        style={[CommonStyles.fab, { backgroundColor: theme.accent, shadowColor: theme.accent }]}
         onPress={() => {
           setLogDate(today);
           setOriginalLogDate(null); // New entry
@@ -272,14 +273,13 @@ export default function WeightTracker() {
         }}
         accessibilityLabel="Add weight log"
       >
-        <Text style={[styles.fabText, { color: theme.fabText }]}>+</Text>
+        <Text style={[CommonStyles.fabText, { color: theme.fabText }]}>+</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'stretch', paddingTop: 0, padding: 16 },
   rangeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 8, flexWrap: 'wrap' },
   rangeBtn: { fontSize: 14, marginHorizontal: 8, paddingVertical: 4, paddingHorizontal: 10, borderRadius: 8 },
   rangeBtnSelected: { fontWeight: 'bold' },
@@ -303,23 +303,4 @@ const styles = StyleSheet.create({
   modalHeading: { fontSize: 18, fontWeight: 'bold', marginBottom: 12, textAlign: 'center' },
   logWeightBtn: { borderRadius: 8, padding: 10, marginBottom: 16 },
   logWeightBtnText: { fontWeight: 'bold', textAlign: 'center' },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  fabText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    marginTop: -2,
-  },
 });
