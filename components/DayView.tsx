@@ -10,6 +10,7 @@ import {
   handleRemoveSymptom,
   handleLogWeight,
   handleLogText,
+  handleToggleSexLog,
 } from '@/features/Handlers';
 import { CycleUtils } from '@/features/CycleUtils';
 
@@ -42,11 +43,20 @@ export default function DayView(props: DayViewProps) {
     setPeriodRanges,
     autoAddPeriodDays, 
     typicalPeriodLength,
+    sexLogs,
+    setSexLogs
   } = useAppState();
 
   const [showSymptoms, setShowSymptoms] = useState(true);
   const [showWeight, setShowWeight] = useState(true);
-  
+  const sexTypes = [
+    { label: 'Protected Sex', value: 'Protected' },
+    { label: 'Unprotected Sex', value: 'Unprotected' },
+    { label: 'Masturbation', value: 'Masturbation' },
+  ];
+
+  const [showSexLog, setShowSexLog] = useState(true);
+
   // State for editing a symptom
   const [editingSymptom, setEditingSymptom] = useState<{ name: string; icon: string } | null>(null);
   const [editSymptomName, setEditSymptomName] = useState('');
@@ -55,7 +65,6 @@ export default function DayView(props: DayViewProps) {
   const [newSymptom, setNewSymptom] = useState('');
   const [newSymptomEmoji, setNewSymptomEmoji] = useState('');
   const [showSymptomAdded, setShowSymptomAdded] = useState(false);
-  const [showAppState, setShowAppState] = useState(false);
 
   useEffect(() => {
     if (showSymptomAdded) {
@@ -68,6 +77,7 @@ export default function DayView(props: DayViewProps) {
   const textLog = textLogs[toDateKey(date)] || '';
   const symptomLog = symptomLogs[toDateKey(date)] || [];
   const weightLog = weightLogs[toDateKey(date)];
+  const sexLog = sexLogs[toDateKey(date)] || [];
 
   // Temporary local state for weight input so we can update it in AppState after the user is done typing
   const [weightInputValue, setWeightInputValue] = useState(weightLog !== undefined ? String(weightLog.value) : '');
@@ -89,7 +99,7 @@ export default function DayView(props: DayViewProps) {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: theme.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
@@ -119,7 +129,7 @@ export default function DayView(props: DayViewProps) {
 
         {/* --- Symptom Logging Section --- */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }} onPress={() => setShowSymptoms(s => !s)}>
-          <Text style={[styles.symptomHeader, { color: theme.text }]}>Log Symptoms</Text>
+          <Text style={[styles.symptomHeader, { color: theme.text }]}>Symptoms</Text>
           <Text style={{ color: theme.accent, fontSize: 18 }}>{showSymptoms ? '▲' : '▼'}</Text>
         </TouchableOpacity>
 
@@ -129,8 +139,8 @@ export default function DayView(props: DayViewProps) {
               <TouchableOpacity
                 key={symptom.name}
                 style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border }, 
-                  symptomLog.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }]
-                }
+                  symptomLog.includes(symptom.name) && { backgroundColor: theme.accent, borderColor: theme.accent }
+                ]}
                 onPress={() => handleToggleSymptom(date, symptom.name, setSymptomLogs)}
                 onLongPress={() => {
                   triggerHaptic();
@@ -253,8 +263,8 @@ export default function DayView(props: DayViewProps) {
 
         {/* --- Weight Logging Section --- */}
         <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowWeight(s => !s)}>
-          <Text style={[styles.weightHeader, { color: theme.text }]}>Log Weight</Text>
-          <Text style={{ color: theme.period, fontSize: 18 }}>{showWeight ? '▲' : '▼'}</Text>
+          <Text style={[styles.weightHeader, { color: theme.text }]}>Weight</Text>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>{showWeight ? '▲' : '▼'}</Text>
         </TouchableOpacity>
 
         {showWeight && (
@@ -283,6 +293,28 @@ export default function DayView(props: DayViewProps) {
               inputMode="decimal"
               textAlign="center"
             />
+          </View>
+        )}
+
+        {/* --- Sex Logging Section --- */}
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowSexLog((s: boolean) => !s)}>
+          <Text style={[styles.symptomHeader, { color: theme.text }]}>Sex</Text>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>{showSexLog ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {showSexLog && (
+          <View style={styles.symptomListVertical}>
+            {sexTypes.map(sexType => (
+              <TouchableOpacity
+                key={sexType.value}
+                style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border },
+                  sexLog.includes(sexType.value) && { backgroundColor: theme.accent, borderColor: theme.accent }
+                ]}
+                onPress={() => handleToggleSexLog(date, sexType.value, setSexLogs)}
+              >
+                <Text style={styles.symptomEmoji}>❤️</Text>
+                <Text style={[styles.symptomTextVertical, { color: theme.text }, sexLog.includes(sexType.value) && { color: theme.fabText }]}>{sexType.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 

@@ -136,7 +136,7 @@ export const themes = {
     borderWidth: 1,
     datePicker: 'light',
   },
-  gothic: {
+  red: {
     background: '#181a20',
     card: '#23242a',
     text: '#fff',

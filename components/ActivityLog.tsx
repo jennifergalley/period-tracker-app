@@ -16,7 +16,8 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
     symptomLogs,
     weightLogs,
     allSymptoms,
-    textLogs
+    textLogs,
+    sexLogs // <-- Add sexLogs from app state
   } = useAppState();
 
   // Build a list of all days for the activity log (e.g., last 60 days)
@@ -67,7 +68,8 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
         const symptoms = symptomLogs[dStr] || [];
         const weight = weightLogs[dStr];
         const textLog = textLogs ? textLogs[dStr] : undefined;
-        if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight && !textLog) return null;
+        const sexLog = sexLogs && sexLogs[dStr] ? sexLogs[dStr] : [];
+        if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight && !textLog && sexLog.length === 0) return null;
         return (
           <TouchableOpacity
             key={dStr}
@@ -94,6 +96,18 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
                       <Text key={s} style={[styles.logSymptom, { color: theme.text }]}> {icon} {s}</Text>
                     );
                   })}
+                </View>
+              )}
+
+              {/* --- Sex Log for the Day --- */}
+              {sexLog.length > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
+                  <Ionicons name='heart' color={theme.error} size={22} style={{ marginRight: 4 }} />
+                  {sexLog.map(type => (
+                    <Text key={type} style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>
+                      {type}
+                    </Text>
+                  ))}
                 </View>
               )}
               

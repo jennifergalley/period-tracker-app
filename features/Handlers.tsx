@@ -12,6 +12,7 @@ type SetAllSymptoms = React.Dispatch<React.SetStateAction<Symptom[]>>;
 type SetWeightLogs = React.Dispatch<React.SetStateAction<Record<string, { value: number; unit: WeightUnit }>>>;
 type SetWeightUnit = React.Dispatch<React.SetStateAction<WeightUnit>>;
 type SetTextLogs = React.Dispatch<React.SetStateAction<Record<string, string>>>;
+type SetSexLogs = React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 
 export function handleTogglePeriod(
   date: Date,
@@ -120,5 +121,23 @@ export function handleLogText(
       return rest;
     }
     return { ...prev, [dStr]: text };
+  });
+}
+
+export function handleToggleSexLog(
+  date: Date,
+  sexType: string,
+  setSexLogs: SetSexLogs
+) {
+  const dStr = toDateKey(date);
+  setSexLogs(prev => {
+    const current = prev[dStr] || [];
+    if (current.includes(sexType)) {
+      // If the sex type is already logged, remove it
+      return { ...prev, [dStr]: current.filter(s => s !== sexType) };
+    } else {
+      // If the sex type is not logged, add it
+      return { ...prev, [dStr]: [...current, sexType] };
+    }
   });
 }

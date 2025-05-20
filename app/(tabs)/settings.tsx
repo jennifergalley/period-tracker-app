@@ -89,10 +89,10 @@ export default function SettingsScreen () {
           <Text style={{ color: themeName === 'sunny' ? '#fff' : theme.text, fontWeight: 'bold' }}>Sunny</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ backgroundColor: themeName === 'gothic' ? '#ff1744' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
-          onPress={() => setThemeName('gothic')}
+          style={{ backgroundColor: themeName === 'red' ? '#ff1744' : theme.card, borderRadius: 8, padding: 12, margin: 6 }}
+          onPress={() => setThemeName('red')}
         >
-          <Text style={{ color: themeName === 'gothic' ? '#fff' : theme.text, fontWeight: 'bold' }}>Gothic</Text>
+          <Text style={{ color: themeName === 'red' ? '#fff' : theme.text, fontWeight: 'bold' }}>Red</Text>
         </TouchableOpacity>
       </View>
 

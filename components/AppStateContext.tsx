@@ -58,6 +58,9 @@ export interface AppState {
 
   predictedPeriods: DateRangeList;
   setPredictedPeriods: React.Dispatch<React.SetStateAction<DateRangeList>>;
+
+  sexLogs: { [date: string]: string[] };
+  setSexLogs: React.Dispatch<React.SetStateAction<{ [date: string]: string[] }>>;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -113,6 +116,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [predictedFertileWindow, setPredictedFertileWindow] = useState<DateRange>(new DateRange(null, null));
   const [predictedOvulationDay, setPredictedOvulationDay] = useState<Date | null>(null);
   const [predictedPeriods, setPredictedPeriods] = useState<DateRangeList>(new DateRangeList());
+  const [sexLogs, setSexLogs] = useState<{ [date: string]: string[] }>({});
   
   // Load state from storage on mount
   useEffect(() => {
@@ -143,6 +147,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const predictedPeriods = DateRangeList.fromJSON(data.predictedPeriods);
         setPredictedPeriods(predictedPeriods);
       }
+      if (data.sexLogs) setSexLogs(data.sexLogs);
     })();
   }, []);  
   
@@ -162,7 +167,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       textLogs,
       predictedFertileWindow, 
       predictedOvulationDay,
-      predictedPeriods
+      predictedPeriods,
+      sexLogs,
     };
     storage.save(data);
   }, [
@@ -179,7 +185,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     textLogs,
     predictedFertileWindow, 
     predictedOvulationDay,
-    predictedPeriods
+    predictedPeriods,
+    sexLogs,
   ]);
   
   // Compute predictions when a new period is logged
@@ -210,6 +217,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       predictedFertileWindow, setPredictedFertileWindow,
       predictedOvulationDay, setPredictedOvulationDay,
       predictedPeriods, setPredictedPeriods,
+      sexLogs, setSexLogs,
     }}>
       {children}
     </AppStateContext.Provider>

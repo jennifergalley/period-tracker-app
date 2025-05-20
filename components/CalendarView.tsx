@@ -23,7 +23,8 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
     showFertileWindow,
     predictedPeriods,
     predictedFertileWindow,
-    predictedOvulationDay
+    predictedOvulationDay,
+    sexLogs
   } = useAppState();
 
   const today = new Date();
@@ -74,6 +75,12 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
   const days: (Date | null)[] = [];
   for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
+  // Fix: set time to midnight to avoid timezone issues
+  for (let i = 0; i < days.length; i++) {
+    if (days[i] !== null) {
+      (days[i] as Date).setHours(0, 0, 0, 0);
+    }
+  }
 
   // PanResponder for swipe gestures on the calendar grid
   const panResponder = useRef(
@@ -163,6 +170,9 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
               ]}>
                 {item && (symptomLogs[toDateKey(item)]?.length > 0) && (
                   <MaterialCommunityIcons name="note-outline" size={16} color={theme.todayColor} style={{ position: 'absolute', top: 4, right: 4 }} />
+                )}
+                {item && sexLogs[toDateKey(item)] && sexLogs[toDateKey(item)].length > 0 && (
+                  <Text style={{ position: 'absolute', top: 4, left: 4, fontSize: 15, color: theme.error }}>❤️</Text>
                 )}
                 <Text style={[
                   styles.dayText,

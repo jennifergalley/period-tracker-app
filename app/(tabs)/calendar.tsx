@@ -20,6 +20,8 @@ export default function Calendar() {
   } = useAppState();
 
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set time to midnight
+
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [dayModalVisible, setDayModalVisible] = useState(false);
   const [activityLogModalVisible, setActivityLogModalVisible] = useState(false);
