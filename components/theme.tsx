@@ -8,9 +8,9 @@ export const themes = {
     card: '#23242a',
     text: '#fff',
     accent: '#4db8ff',
-    period: '#ff5c8a',
+    period: '#e53935',
     fertile: '#4db8ff',
-    ovulation: '#9b59b6',
+    ovulation: '#f768e9',
     border: '#333',
     todayColor: '#FFD700',
     error: '#ff5c5c',
@@ -31,7 +31,7 @@ export const themes = {
     fertile: '#4db8ff',
     ovulation: '#f48fb1',
     border: '#bbb', // slightly darker border for text inputs
-    todayColor: '#FFD700',
+    todayColor: '#0ef22e',
     error: '#ff5c5c',
     inputBg: '#f3f3f6', // subtle grey background for text inputs
     inputText: '#181a20',
@@ -50,7 +50,7 @@ export const themes = {
     fertile: '#64b5f6',
     ovulation: '#00bcd4',
     border: '#90caf9',
-    todayColor: '#f48fb1',
+    todayColor: '#f20e38',
     error: '#e53935',
     inputBg: '#e3f2fd',
     inputText: '#1a2636',
@@ -84,8 +84,8 @@ export const themes = {
     card: '#b2f2e9',
     text: '#134e4a',
     accent: '#16807a', // darker teal for better contrast on selected tab
-    period: '#ffb4a2',
-    fertile: '#2ec4b6',
+    period: '#16968f',
+    fertile: '#48cbbf',
     ovulation: '#a3f7bf',
     border: '#99e2b4',
     todayColor: '#0000FF',
@@ -103,11 +103,11 @@ export const themes = {
     card: '#d1b3ff',
     text: '#3d246c',
     accent: '#8f5cff',
-    period: '#c77dff',
-    fertile: '#87CEEB', // sky blue for strong contrast
+    period: '#8f5cff',
+    fertile: '#c77dff', // sky blue for strong contrast
     ovulation: '#ff7ce5', // bright magenta-pink for contrast
     border: '#b39ddb',
-    todayColor: '#8f5cff',
+    todayColor: '#f42c4e',
     error: '#b91c1c',
     inputBg: '#ede9fe',
     inputText: '#3d246c',
@@ -140,12 +140,12 @@ export const themes = {
     background: '#181a20',
     card: '#23242a',
     text: '#fff',
-    accent: '#ff1744', // red accent
-    period: '#ff1744', // red for period
-    fertile: '#b71c1c', // deep red for fertile
-    ovulation: '#ff5252', // lighter red for ovulation
+    accent: '#ff1744',
+    period: '#ff1744',
+    fertile: '#fe9fff',
+    ovulation: '#ff0083',
     border: '#333',
-    todayColor: '#DAA520',
+    todayColor: '#0eacf2',
     error: '#ff5252',
     inputBg: '#23242a',
     inputText: '#fff',

@@ -83,6 +83,16 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="statistics"
+          options={{
+            title: 'Statistics',
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} color={color} size={24}/>
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="settings"
           options={{
             title: 'Settings',

@@ -14,6 +14,17 @@ export interface Symptom {
   icon: string;
 }
 
+export interface UserStats {
+  averageCycleLength: number;
+  minCycleLength: number;
+  maxCycleLength: number;
+  cycleLengths: number[];
+  averagePeriodLength: number;
+  minPeriodLength: number;
+  maxPeriodLength: number;
+  periodLengths: number[];
+}
+
 export interface AppState {
   // State variables / Generic app behavior
   weightUnit: WeightUnit;
@@ -76,6 +87,9 @@ export interface AppState {
   setShowWeightLog: React.Dispatch<React.SetStateAction<boolean>>;
   showNotesLog: boolean;
   setShowNotesLog: React.Dispatch<React.SetStateAction<boolean>>;
+
+  userStats: UserStats;
+  setUserStats: React.Dispatch<React.SetStateAction<UserStats>>;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -140,6 +154,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [showSexLog, setShowSexLog] = useState(true);
   const [showWeightLog, setShowWeightLog] = useState(true);
   const [showNotesLog, setShowNotesLog] = useState(true);
+  const [userStats, setUserStats] = useState<UserStats>({
+    averageCycleLength: 28,
+    minCycleLength: 28,
+    maxCycleLength: 28,
+    cycleLengths: [],
+    averagePeriodLength: 0,
+    minPeriodLength: 0,
+    maxPeriodLength: 0,
+    periodLengths: [],
+  });
 
   // Load state from storage on mount
   useEffect(() => {
@@ -177,6 +201,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (typeof data.showSexLog === 'boolean') setShowSexLog(data.showSexLog);
       if (typeof data.showWeightLog === 'boolean') setShowWeightLog(data.showWeightLog);
       if (typeof data.showNotesLog === 'boolean') setShowNotesLog(data.showNotesLog);
+      if (data.userStats) setUserStats(data.userStats);
     })();
   }, []);  
   
@@ -204,6 +229,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showSexLog,
       showWeightLog,
       showNotesLog,
+      userStats,
     };
     storage.save(data);
   }, [
@@ -228,6 +254,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     showSexLog,
     showWeightLog,
     showNotesLog,
+    userStats,
   ]);
   
   // Compute predictions when a new period is logged
@@ -237,8 +264,10 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setPredictedOvulationDay(ovulationDay);
     setPredictedFertileWindow(fertileWindow);  
 
-    // Compute all predicted periods for the next year
-    const predictedPeriodsList = CycleUtils.getAllPredictedPeriods(periodRanges, typicalPeriodLength);
+    // Compute all user stats and predictions
+    const stats = CycleUtils.computeUserStats(periodRanges);
+    setUserStats(stats);
+    const predictedPeriodsList = CycleUtils.getAllPredictedPeriods(periodRanges, typicalPeriodLength, stats.averageCycleLength);
     setPredictedPeriods(predictedPeriodsList);
   }, [periodRanges, typicalPeriodLength]);
   
@@ -265,6 +294,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showSexLog, setShowSexLog,
       showWeightLog, setShowWeightLog,
       showNotesLog, setShowNotesLog,
+      userStats, setUserStats,
     }}>
       {children}
     </AppStateContext.Provider>

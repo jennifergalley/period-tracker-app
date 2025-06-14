@@ -183,5 +183,60 @@ export class CycleUtils {
 
         return cycleLength + 1; // Add 1 to make it 1-based
     }
+
+    /**
+     * Computes user stats: cycle/period lengths, averages, min/max.
+     * @param periodRanges The list of period ranges.
+     */
+    static computeUserStats(
+        periodRanges: DateRangeList
+    ) {
+        // --- Cycle lengths ---
+        const cycleLengths: number[] = [];
+        
+        // Sort ranges by start date to handle backfilled data
+        const ranges = (periodRanges.ranges || []).slice().sort((a, b) => {
+            if (!a.start || !b.start) return 0;
+            return a.start.getTime() - b.start.getTime();
+        });
+        for (let i = 1; i < ranges.length; i++) {
+            const prev = ranges[i - 1];
+            const curr = ranges[i];
+            if (prev.start && curr.start) {
+                const diff = Math.round((curr.start.getTime() - prev.start.getTime()) / (1000 * 60 * 60 * 24));
+                cycleLengths.push(diff);
+            }
+        }
+        let averageCycleLength = 28;
+        if (cycleLengths.length > 0) {
+            averageCycleLength = Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length);
+        }
+        const minCycleLength = cycleLengths.length > 0 ? Math.min(...cycleLengths) : 28;
+        const maxCycleLength = cycleLengths.length > 0 ? Math.max(...cycleLengths) : 28;
+
+        // --- Period lengths ---
+        const periodLengths: number[] = [];
+        for (let i = 0; i < ranges.length; i++) {
+            const r = ranges[i];
+            if (r.start && r.end) {
+                const diff = Math.round((r.end.getTime() - r.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                periodLengths.push(diff);
+            }
+        }
+        const averagePeriodLength = periodLengths.length > 0 ? Math.round(periodLengths.reduce((a, b) => a + b, 0) / periodLengths.length) : 0;
+        const minPeriodLength = periodLengths.length > 0 ? Math.min(...periodLengths) : 0;
+        const maxPeriodLength = periodLengths.length > 0 ? Math.max(...periodLengths) : 0;
+
+        return {
+            averageCycleLength,
+            minCycleLength,
+            maxCycleLength,
+            cycleLengths,
+            averagePeriodLength,
+            minPeriodLength,
+            maxPeriodLength,
+            periodLengths,
+        };
+    }
 }
 

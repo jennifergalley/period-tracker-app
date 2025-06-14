@@ -158,9 +158,11 @@ export default function SettingsScreen () {
 
       {/* --- Log Type Visibility Toggles --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Show Log Types</Text>
-      <Text style={{ color: theme.text, fontSize: 16, marginBottom: 8 }}>
-        This won't delete existing logs, but will hide these inputs on the log entry page.
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+        <Text style={{ color: theme.text, fontSize: 16, marginBottom: 8 }}>
+          This won't delete existing logs, but will hide these inputs on the log entry page.
+        </Text>
+      </View>
       <View style={{ width: '90%', marginBottom: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
           <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Symptoms</Text>
