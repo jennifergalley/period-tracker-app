@@ -4,10 +4,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '@/components/Theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Keyboard } from 'react-native';
+import { useAppState } from '@/components/AppStateContext';
 
 export default function TabLayout() {
   const { theme } = useTheme();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const appState = useAppState();
 
   useEffect(() => {
     const show = () => setKeyboardVisible(true);
@@ -61,11 +63,23 @@ export default function TabLayout() {
         <Tabs.Screen
           name="weight"
           options={{
-            title: 'Weight Tracker',
+            title: 'Weight',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? 'barbell' : 'barbell-outline'} color={color} size={24}/>
             ),
+            href: appState.showWeightLog ? undefined : null,
+          }}
+        />
+        <Tabs.Screen
+          name="mood"
+          options={{
+            title: 'Mood',
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons name={focused ? 'happy' : 'happy-outline'} color={color} size={24}/>
+            ),
+            href: appState.showMoodLog ? undefined : null,
           }}
         />
         <Tabs.Screen

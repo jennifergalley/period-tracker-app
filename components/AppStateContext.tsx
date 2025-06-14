@@ -61,6 +61,21 @@ export interface AppState {
 
   sexLogs: { [date: string]: string[] };
   setSexLogs: React.Dispatch<React.SetStateAction<{ [date: string]: string[] }>>;
+
+  moodLogs: { [date: string]: { mood: number; anxiety: number; depression: number } };
+  setMoodLogs: React.Dispatch<React.SetStateAction<{ [date: string]: { mood: number; anxiety: number; depression: number } }>>;
+
+  // Log visibility toggles
+  showSymptomsLog: boolean;
+  setShowSymptomsLog: React.Dispatch<React.SetStateAction<boolean>>;
+  showMoodLog: boolean;
+  setShowMoodLog: React.Dispatch<React.SetStateAction<boolean>>;
+  showSexLog: boolean;
+  setShowSexLog: React.Dispatch<React.SetStateAction<boolean>>;
+  showWeightLog: boolean;
+  setShowWeightLog: React.Dispatch<React.SetStateAction<boolean>>;
+  showNotesLog: boolean;
+  setShowNotesLog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -117,7 +132,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [predictedOvulationDay, setPredictedOvulationDay] = useState<Date | null>(null);
   const [predictedPeriods, setPredictedPeriods] = useState<DateRangeList>(new DateRangeList());
   const [sexLogs, setSexLogs] = useState<{ [date: string]: string[] }>({});
-  
+  // Mood/Anxiety/Depression logs: 0 = no data, 1-5 = user value
+  const [moodLogs, setMoodLogs] = useState<{ [date: string]: { mood: number; anxiety: number; depression: number } }>({});
+  // Log visibility toggles
+  const [showSymptomsLog, setShowSymptomsLog] = useState(true);
+  const [showMoodLog, setShowMoodLog] = useState(true);
+  const [showSexLog, setShowSexLog] = useState(true);
+  const [showWeightLog, setShowWeightLog] = useState(true);
+  const [showNotesLog, setShowNotesLog] = useState(true);
+
   // Load state from storage on mount
   useEffect(() => {
     (async () => {
@@ -148,6 +171,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setPredictedPeriods(predictedPeriods);
       }
       if (data.sexLogs) setSexLogs(data.sexLogs);
+      if (data.moodLogs) setMoodLogs(data.moodLogs);
+      if (typeof data.showSymptomsLog === 'boolean') setShowSymptomsLog(data.showSymptomsLog);
+      if (typeof data.showMoodLog === 'boolean') setShowMoodLog(data.showMoodLog);
+      if (typeof data.showSexLog === 'boolean') setShowSexLog(data.showSexLog);
+      if (typeof data.showWeightLog === 'boolean') setShowWeightLog(data.showWeightLog);
+      if (typeof data.showNotesLog === 'boolean') setShowNotesLog(data.showNotesLog);
     })();
   }, []);  
   
@@ -169,6 +198,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       predictedOvulationDay,
       predictedPeriods,
       sexLogs,
+      moodLogs,
+      showSymptomsLog,
+      showMoodLog,
+      showSexLog,
+      showWeightLog,
+      showNotesLog,
     };
     storage.save(data);
   }, [
@@ -187,6 +222,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     predictedOvulationDay,
     predictedPeriods,
     sexLogs,
+    moodLogs,
+    showSymptomsLog,
+    showMoodLog,
+    showSexLog,
+    showWeightLog,
+    showNotesLog,
   ]);
   
   // Compute predictions when a new period is logged
@@ -218,6 +259,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       predictedOvulationDay, setPredictedOvulationDay,
       predictedPeriods, setPredictedPeriods,
       sexLogs, setSexLogs,
+      moodLogs, setMoodLogs,
+      showSymptomsLog, setShowSymptomsLog,
+      showMoodLog, setShowMoodLog,
+      showSexLog, setShowSexLog,
+      showWeightLog, setShowWeightLog,
+      showNotesLog, setShowNotesLog,
     }}>
       {children}
     </AppStateContext.Provider>

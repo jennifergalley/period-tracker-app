@@ -17,7 +17,8 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
     weightLogs,
     allSymptoms,
     textLogs,
-    sexLogs // <-- Add sexLogs from app state
+    sexLogs,
+    moodLogs
   } = useAppState();
 
   // Build a list of all days for the activity log (e.g., last 60 days)
@@ -69,7 +70,8 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
         const weight = weightLogs[dStr];
         const textLog = textLogs ? textLogs[dStr] : undefined;
         const sexLog = sexLogs && sexLogs[dStr] ? sexLogs[dStr] : [];
-        if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight && !textLog && sexLog.length === 0) return null;
+        const moodLog = moodLogs && moodLogs[dStr] ? moodLogs[dStr] : { mood: 0, anxiety: 0, depression: 0 };
+        if (!isPeriod && !isOvulation && !isFertile && symptoms.length === 0 && !weight && !textLog && sexLog.length === 0 && (!moodLog || (moodLog.mood === 0 && moodLog.anxiety === 0 && moodLog.depression === 0))) return null;
         return (
           <TouchableOpacity
             key={dStr}
@@ -108,6 +110,21 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
                       {type}
                     </Text>
                   ))}
+                </View>
+              )}
+
+              {/* --- Mood/Anxiety/Depression Log for the Day --- */}
+              {(moodLog.mood > 0 || moodLog.anxiety > 0 || moodLog.depression > 0) && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
+                  {moodLog.mood > 0 && (
+                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Mood {['😁','🙂','😐','🙁','😞'][moodLog.mood-1]}</Text>
+                  )}
+                  {moodLog.anxiety > 0 && (
+                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Anxiety {['😌','🙂','😐','😰','😱'][moodLog.anxiety-1]}</Text>
+                  )}
+                  {moodLog.depression > 0 && (
+                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Depression {['🙂','😕','😟','😢','😭'][moodLog.depression-1]}</Text>
+                  )}
                 </View>
               )}
               

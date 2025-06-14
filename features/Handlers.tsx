@@ -13,6 +13,7 @@ type SetWeightLogs = React.Dispatch<React.SetStateAction<Record<string, { value:
 type SetWeightUnit = React.Dispatch<React.SetStateAction<WeightUnit>>;
 type SetTextLogs = React.Dispatch<React.SetStateAction<Record<string, string>>>;
 type SetSexLogs = React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+type SetMoodLogs = React.Dispatch<React.SetStateAction<{ [date: string]: { mood: number; anxiety: number; depression: number } }>>;
 
 export function handleTogglePeriod(
   date: Date,
@@ -139,5 +140,25 @@ export function handleToggleSexLog(
       // If the sex type is not logged, add it
       return { ...prev, [dStr]: [...current, sexType] };
     }
+  });
+}
+
+// Mood/Anxiety/Depression log handler
+export function handleLogMood(
+  date: Date,
+  field: 'mood' | 'anxiety' | 'depression',
+  value: number,
+  setMoodLogs: SetMoodLogs
+) {
+  const dStr = toDateKey(date);
+  setMoodLogs(prev => {
+    const prevEntry = prev[dStr] || { mood: 0, anxiety: 0, depression: 0 };
+    const updated = { ...prevEntry, [field]: value };
+    // If all fields are 0, remove the entry
+    if (updated.mood === 0 && updated.anxiety === 0 && updated.depression === 0) {
+      const { [dStr]: _, ...rest } = prev;
+      return rest;
+    }
+    return { ...prev, [dStr]: updated };
   });
 }

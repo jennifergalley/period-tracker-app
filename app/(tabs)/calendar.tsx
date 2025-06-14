@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DayView from '@/components/DayView';
+import LogEntry from '@/components/LogEntry';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import { toDateKey } from '@/features/DateUtils';
@@ -63,7 +63,7 @@ export default function Calendar() {
       }}>
         <View style={{ flex: 1, backgroundColor: theme.card }}>
           {selectedDay && (
-            <DayView
+            <LogEntry
               date={selectedDay}
               isPeriod={periodRanges.containsDate(selectedDay)}
               isFertile={!!(fertileStartToShow && fertileEndToShow && selectedDay >= fertileStartToShow && selectedDay <= fertileEndToShow)}

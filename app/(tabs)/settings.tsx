@@ -106,7 +106,7 @@ export default function SettingsScreen () {
           value={autoAddPeriodDays}
           onValueChange={setAutoAddPeriodDays}
           trackColor={{ false: theme.border, true: theme.accent }}
-          thumbColor={autoAddPeriodDays ? theme.fabText : theme.card}
+          thumbColor={autoAddPeriodDays ? theme.accent : theme.card}
         />
       </View>
 
@@ -142,7 +142,7 @@ export default function SettingsScreen () {
           value={showOvulation}
           onValueChange={setShowOvulation}
           trackColor={{ false: theme.border, true: theme.accent }}
-          thumbColor={showOvulation ? theme.fabText : theme.card}
+          thumbColor={showOvulation ? theme.accent : theme.card}
         />
       </View>
 
@@ -152,8 +152,61 @@ export default function SettingsScreen () {
           value={showFertileWindow}
           onValueChange={setShowFertileWindow}
           trackColor={{ false: theme.border, true: theme.accent }}
-          thumbColor={showFertileWindow ? theme.fabText : theme.card}
+          thumbColor={showFertileWindow ? theme.accent : theme.card}
         />
+      </View>
+
+      {/* --- Log Type Visibility Toggles --- */}
+      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Show Log Types</Text>
+      <Text style={{ color: theme.text, fontSize: 16, marginBottom: 8 }}>
+        This won't delete existing logs, but will hide these inputs on the log entry page.
+      </Text>
+      <View style={{ width: '90%', marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Symptoms</Text>
+          <Switch
+            value={appState.showSymptomsLog}
+            onValueChange={appState.setShowSymptomsLog}
+            trackColor={{ false: theme.border, true: theme.accent }}
+            thumbColor={appState.showSymptomsLog ? theme.accent : theme.card}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Weight</Text>
+          <Switch
+            value={appState.showWeightLog}
+            onValueChange={appState.setShowWeightLog}
+            trackColor={{ false: theme.border, true: theme.accent }}
+            thumbColor={appState.showWeightLog ? theme.accent : theme.card}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Sex</Text>
+          <Switch
+            value={appState.showSexLog}
+            onValueChange={appState.setShowSexLog}
+            trackColor={{ false: theme.border, true: theme.accent }}
+            thumbColor={appState.showSexLog ? theme.accent : theme.card}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Mood & Mental Health</Text>
+          <Switch
+            value={appState.showMoodLog}
+            onValueChange={appState.setShowMoodLog}
+            trackColor={{ false: theme.border, true: theme.accent }}
+            thumbColor={appState.showMoodLog ? theme.accent : theme.card}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Notes</Text>
+          <Switch
+            value={appState.showNotesLog}
+            onValueChange={appState.setShowNotesLog}
+            trackColor={{ false: theme.border, true: theme.accent }}
+            thumbColor={appState.showNotesLog ? theme.accent : theme.card}
+          />
+        </View>
       </View>
 
       {/* --- Show App Storage --- */}
