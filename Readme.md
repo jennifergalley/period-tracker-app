@@ -77,13 +77,11 @@ If you are using **Expo Managed Workflow**:
 5. Wait for the build to finish. You’ll get a link in the terminal or on the [Expo build dashboard](https://expo.dev/accounts/your-username/projects/your-project/builds).
 
 
----
 
 #### 2. Download the APK
 
 - Once the build is complete, download the `.apk` file from the Expo dashboard or the link provided in your terminal.
 
----
 
 #### 3. Install the APK on Your Phone
 
@@ -92,7 +90,11 @@ If you are using **Expo Managed Workflow**:
 3. If prompted, allow installation from unknown sources.
 4. Follow the prompts to install the app.
 
----
 
 **Note:**  
 If you are using the Bare React Native workflow, you’ll need to run `./gradlew assembleRelease` in the `android` directory and find the APK in `android/app/build/outputs/apk/release/app-release.apk`.
+
+### Updating Dependencies
+
+Run the following command to update dependencies to ensure compatibility with Expo:
+`npx expo install --check`
