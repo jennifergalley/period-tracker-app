@@ -15,6 +15,7 @@ import {
 } from '@/features/Handlers';
 import { CycleUtils } from '@/features/CycleUtils';
 import Slider from '@react-native-assets/slider';
+import { moodEmojis, anxietyEmojis, depressionEmojis } from '@/features/Emojis';
 
 type LogEntryProps = {
   date: Date;
@@ -343,7 +344,7 @@ export default function LogEntry(props: LogEntryProps) {
         {toggleMoodLogVisible && showMoodLog && (
           <View style={{ width: '100%', marginBottom: 8, backgroundColor: theme.card, borderRadius: 12, padding: 16 }}>
             {/* Mood Slider */}
-            <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Mood {["", "😞","🙁","😐","🙂","😁"][moodLog.mood]}</Text>
+            <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Mood {moodEmojis[moodLog.mood]}</Text>
             <Slider
               value={moodLog.mood}
               minimumValue={0}
@@ -357,13 +358,13 @@ export default function LogEntry(props: LogEntryProps) {
               style={{ width: '100%', height: 36 }}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-              <Text style={{ color: theme.text, fontSize: 22, opacity: moodLog.mood === 0 ? 1 : 0.6 }}>❌</Text>
-              {["😞","🙁","😐","🙂","😁"].map((emoji, idx) => (
-                <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx+1 === moodLog.mood ? 1 : 0.6 }}>{emoji}</Text>
+              <Text style={{ color: theme.text, fontSize: 22, opacity: moodLog.mood === 0 ? 1 : 0.6 }}></Text>
+              {moodEmojis.map((emoji, idx) => (
+                <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx === moodLog.mood ? 1 : 0.6 }}>{emoji}</Text>
               ))}
             </View>
             {/* Anxiety Slider */}
-            <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Anxiety {["", '😌','🙂','😐','😰','😱'][moodLog.anxiety]}</Text>
+            <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Anxiety {anxietyEmojis[moodLog.anxiety]}</Text>
             <Slider
               value={moodLog.anxiety}
               minimumValue={0}
@@ -377,13 +378,13 @@ export default function LogEntry(props: LogEntryProps) {
               style={{ width: '100%', height: 36 }}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-              <Text style={{ color: theme.text, fontSize: 22, opacity: moodLog.anxiety === 0 ? 1 : 0.6 }}>❌</Text>
-              {['😌','🙂','😐','😰','😱'].map((emoji, idx) => (
-                <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx+1 === moodLog.anxiety ? 1 : 0.6 }}>{emoji}</Text>
+              <Text style={{ color: theme.text, fontSize: 22, opacity: moodLog.anxiety === 0 ? 1 : 0.6 }}></Text>
+              {anxietyEmojis.map((emoji, idx) => (
+                <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx === moodLog.anxiety ? 1 : 0.6 }}>{emoji}</Text>
               ))}
             </View>
             {/* Depression Slider */}
-            <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Depression {["", '🙂','😕','😟','😢','😭'][moodLog.depression]}</Text>
+            <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Depression {depressionEmojis[moodLog.depression]}</Text>
             <Slider
               value={moodLog.depression}
               minimumValue={0}
@@ -397,9 +398,9 @@ export default function LogEntry(props: LogEntryProps) {
               style={{ width: '100%', height: 36 }}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ color: theme.text, fontSize: 22, opacity: moodLog.depression === 0 ? 1 : 0.6 }}>❌</Text>
-              {['🙂','😕','😟','😢','😭'].map((emoji, idx) => (
-                <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx+1 === moodLog.depression ? 1 : 0.6 }}>{emoji}</Text>
+              <Text style={{ color: theme.text, fontSize: 22, opacity: moodLog.depression === 0 ? 1 : 0.6 }}></Text>
+              {depressionEmojis.map((emoji, idx) => (
+                <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx === moodLog.depression ? 1 : 0.6 }}>{emoji}</Text>
               ))}
             </View>
           </View>

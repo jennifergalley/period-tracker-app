@@ -6,6 +6,7 @@ import { DEFAULT_SYMPTOMS } from '@/features/SymptomUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { formatDate } from '@/features/DateUtils';
 import { toDateKey } from '@/features/DateUtils';
+import { moodEmojis, anxietyEmojis, depressionEmojis } from '@/features/Emojis';
 
 export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress?: (date: Date) => void, onHeadingPress?: () => void }) {
   const { theme } = useTheme();
@@ -117,13 +118,13 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
               {(moodLog.mood > 0 || moodLog.anxiety > 0 || moodLog.depression > 0) && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
                   {moodLog.mood > 0 && (
-                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Mood {['😁','🙂','😐','🙁','😞'][moodLog.mood-1]}</Text>
+                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Mood {moodEmojis[moodLog.mood]}</Text>
                   )}
                   {moodLog.anxiety > 0 && (
-                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Anxiety {['😌','🙂','😐','😰','😱'][moodLog.anxiety-1]}</Text>
+                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Anxiety {anxietyEmojis[moodLog.anxiety]}</Text>
                   )}
                   {moodLog.depression > 0 && (
-                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Depression {['🙂','😕','😟','😢','😭'][moodLog.depression-1]}</Text>
+                    <Text style={[styles.logSymptom, { color: theme.text, marginRight: 8 }]}>Depression {depressionEmojis[moodLog.depression]}</Text>
                   )}
                 </View>
               )}

@@ -6,6 +6,7 @@ import { toDateKey } from '@/features/DateUtils';
 import { CommonStyles } from '@/components/CommonStyles';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions, Platform } from 'react-native';
+import { moodEmojis, anxietyEmojis, depressionEmojis } from '@/features/Emojis';
 
 const dateRanges = [
   { label: 'This Month', months: 1 },
@@ -17,10 +18,6 @@ const dateRanges = [
 function formatDate(date: Date) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
-
-const moodEmojis = ["", "😞","🙁","😐","🙂","😁"];
-const anxietyEmojis = ["", "😌", "🙂", "😐", "😰", "😱"];
-const depressionEmojis = ["", "🙂", "😕", "😟", "😢", "😭"];
 
 export default function MoodTracker() {
   const { theme } = useTheme();
