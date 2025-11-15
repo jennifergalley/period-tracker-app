@@ -40,6 +40,11 @@
 - Use platform-specific code only when necessary, and document it clearly.
 - Test on both Android and iOS simulators/emulators if possible.
 
+### Package Management
+- Always use import statements instead of require.
+- Keep dependencies minimal and only add necessary packages.
+- Place import statements at the top of the file, grouped by external and internal imports.
+
 ## 2. Project Structure & Organization
 
 ### File/Folder Structure

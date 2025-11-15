@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable, StyleSheet, Platform, ToastAndroid } from 'react-native';
 import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import * as FileSystem from 'expo-file-system';
 import { DEFAULT_SYMPTOMS } from '@/features/SymptomUtils';
 import { DateRangeList } from '@/features/DateRangeList';
 import { CommonStyles } from '@/components/CommonStyles';
+import { AppDataUtils } from '@/features/AppDataUtils';
 
 export default function SettingsScreen () {
   const appState = useAppState();
@@ -20,6 +21,7 @@ export default function SettingsScreen () {
 
   const [showSymptomAdded, setShowSymptomAdded] = useState(false);
   const [showAppState, setShowAppState] = useState(false);
+  const [stateRefreshKey, setStateRefreshKey] = useState(0);
 
   useEffect(() => {
     if (showSymptomAdded) {
@@ -219,7 +221,7 @@ export default function SettingsScreen () {
           <Text style={{ color: theme.text, fontSize: 15, fontWeight: 'bold'  }}>{showAppState ? 'Hide' : 'Show'} App Storage</Text>
         </TouchableOpacity>
         {showAppState && (
-          <View style={[styles.stateBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={[styles.stateBox, { backgroundColor: theme.card, borderColor: theme.border }]} key={stateRefreshKey}>
             <Text style={[styles.stateText, { color: theme.text }]} selectable>
               {JSON.stringify(appState, (key, value) => {
                 if (typeof value === 'function') return undefined;
@@ -229,51 +231,28 @@ export default function SettingsScreen () {
           </View>
         )}
 
+      {/* --- Import Data Button --- */}
+      <TouchableOpacity
+        style={{ marginTop: 32, backgroundColor: theme.accent, borderRadius: 8, padding: 14, alignSelf: 'stretch', marginHorizontal: 24 }}
+        onPress={() => AppDataUtils.importData(appState)}
+      >
+        <Text style={{ color: theme.background, fontWeight: 'bold', textAlign: 'center' }}>Import Data</Text>
+      </TouchableOpacity>
+
+      {/* --- Export Data Button --- */}
+      <TouchableOpacity
+        style={{ marginTop: 32, backgroundColor: theme.accent, borderRadius: 8, padding: 14, alignSelf: 'stretch', marginHorizontal: 24 }}
+        onPress={() => AppDataUtils.exportData(appState)}
+      >
+        <Text style={{ color: theme.background, fontWeight: 'bold', textAlign: 'center' }}>Export All Data</Text>
+      </TouchableOpacity>
+
       {/* --- Delete All Data Button --- */}
       <TouchableOpacity
         style={{ marginTop: 32, backgroundColor: theme.error, borderRadius: 8, padding: 14, alignSelf: 'stretch', marginHorizontal: 24 }}
         onPress={async () => {
-          if (Platform.OS === 'web') {
-            const confirmed = window.confirm('Are you sure you want to delete all your logged data? This action is NOT reversible.');
-            if (!confirmed) return;
-            setWeightLogs({});
-            setWeightUnit('lbs');
-            setPeriodRanges(new DateRangeList());
-            setSymptomLogs({});
-            setAllSymptoms(DEFAULT_SYMPTOMS);
-            setPeriodRanges(new DateRangeList());
-            setAutoAddPeriodDays(true);
-            setTypicalPeriodLength(5);
-            setShowOvulation(true);
-            setShowFertileWindow(true);
-            setTextLogs({});
-          } else {
-            Alert.alert(
-              'Delete All Logs',
-              'Are you sure you want to delete all your logged data? This action is NOT reversible.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Delete', style: 'destructive', onPress: async () => {
-                    try {
-                      await FileSystem.deleteAsync(FileSystem.documentDirectory + 'appState.json', { idempotent: true });
-                    } catch {}
-                    setWeightLogs({});
-                    setWeightUnit('lbs');
-                    setPeriodRanges(new DateRangeList());
-                    setSymptomLogs({});
-                    setAllSymptoms(DEFAULT_SYMPTOMS);
-                    setPeriodRanges(new DateRangeList());
-                    setAutoAddPeriodDays(true);
-                    setTypicalPeriodLength(5);
-                    setShowOvulation(true);
-                    setShowFertileWindow(true);
-                    setTextLogs({});
-                  }
-                }
-              ]
-            );
-          }
+          await AppDataUtils.deleteAllData(appState, DEFAULT_SYMPTOMS);
+          setStateRefreshKey(prev => prev + 1);
         }}
       >
         <Text style={{ color: theme.background, fontWeight: 'bold', textAlign: 'center' }}>Delete All Logs</Text>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/components/Theme';
@@ -59,6 +59,7 @@ export default function LogEntry(props: LogEntryProps) {
 
   const [showSymptoms, setShowSymptoms] = useState(true);
   const [showWeight, setShowWeight] = useState(true);
+  const [showAllSymptoms, setShowAllSymptoms] = useState(false);
   const sexTypes = [
     { label: 'Protected Sex', value: 'Protected' },
     { label: 'Unprotected Sex', value: 'Unprotected' },
@@ -96,6 +97,23 @@ export default function LogEntry(props: LogEntryProps) {
 
   // Compute cycle day
   const cycleDay = CycleUtils.getCycleDay(periodRanges, date);
+
+  // Sort symptoms by frequency (most to least)
+  const sortedSymptoms = useMemo(() => {
+    // Calculate frequency for each symptom
+    const symptomCounts: Record<string, number> = {};
+    Object.values(symptomLogs).flat().forEach(symptomName => {
+      symptomCounts[symptomName] = (symptomCounts[symptomName] || 0) + 1;
+    });
+    
+    // Sort allSymptoms by frequency (descending), then alphabetically for ties
+    return [...allSymptoms].sort((a, b) => {
+      const countA = symptomCounts[a.name] || 0;
+      const countB = symptomCounts[b.name] || 0;
+      if (countB !== countA) return countB - countA;
+      return a.name.localeCompare(b.name);
+    });
+  }, [allSymptoms, symptomLogs]);
 
   // Add haptic feedback for long-press delete
   const triggerHaptic = () => {
@@ -148,7 +166,7 @@ export default function LogEntry(props: LogEntryProps) {
         )}
         {showSymptoms && showSymptomsLog && (
           <View style={styles.symptomListVertical}>
-            {allSymptoms.map(symptom => (
+            {(showAllSymptoms ? sortedSymptoms : sortedSymptoms.slice(0, 10)).map(symptom => (
               <TouchableOpacity
                 key={symptom.name}
                 style={[styles.symptomRow, { backgroundColor: theme.card, borderColor: theme.border }, 
@@ -176,6 +194,18 @@ export default function LogEntry(props: LogEntryProps) {
                 <Text style={[styles.symptomTextVertical, { color: theme.text }, symptomLog.includes(symptom.name) && { color: theme.fabText }]}>{symptom.name}</Text>
               </TouchableOpacity>
             ))}
+
+            {/* --- See All / See Less Button --- */}
+            {sortedSymptoms.length > 10 && (
+              <TouchableOpacity
+                style={{ alignItems: 'center', paddingVertical: 12, marginTop: 4 }}
+                onPress={() => setShowAllSymptoms(!showAllSymptoms)}
+              >
+                <Text style={{ color: theme.accent, fontWeight: 'bold', fontSize: 15 }}>
+                  {showAllSymptoms ? 'Show Fewer Symptoms' : `Show All Symptoms`}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {/* --- Add/Edit Custom Symptom Row --- */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>

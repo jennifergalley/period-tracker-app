@@ -4,6 +4,7 @@ import { useAppState } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import { CommonStyles } from '@/components/CommonStyles';
 import { SymptomUtils } from '@/features/SymptomUtils';
+import SymptomHeatmap from '@/components/SymptomHeatmap';
 
 function StatCard({ title, children }: { title: string; children: React.ReactNode }) {
   const { theme } = useTheme();
@@ -74,6 +75,10 @@ export default function StatisticsScreen() {
             ))}
           </View>
         )}
+      </StatCard>
+
+      <StatCard title="Symptom Cycle Heatmap">
+        <SymptomHeatmap maxCycleDays={35} />
       </StatCard>
     </ScrollView>
   );

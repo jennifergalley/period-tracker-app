@@ -159,7 +159,7 @@ export class CycleUtils {
     }
 
     /**
-     * Calculates the current cycle day based on the provided period ranges and a specific date.
+     * Calculates the cycle day based on the provided period ranges and a specific date.
      *
      * @param periodRanges - A list of date ranges representing previous periods.
      * @param date - The date for which to calculate the cycle day.
@@ -172,14 +172,31 @@ export class CycleUtils {
         let startOfDate = new Date(date);
         startOfDate.setHours(0, 0, 0, 0);
 
-        // Get the last period range
-        const lastPeriod = periodRanges.getLastRange();
-        if (!lastPeriod || !lastPeriod.start) return 0;
+        // Sort ranges by start date to find the correct cycle
+        const sortedRanges = (periodRanges.ranges || []).slice().sort((a, b) => {
+            if (!a.start || !b.start) return 0;
+            return a.start.getTime() - b.start.getTime();
+        });
 
-        // Calculate the cycle day
-        const cycleStart = lastPeriod.start;
-        const cycleEnd = startOfDate;
-        const cycleLength = Math.floor((cycleEnd.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+        // Find the most recent period that started on or before this date
+        let relevantPeriod = null;
+        for (const range of sortedRanges) {
+            if (!range.start) continue;
+            const periodStart = new Date(range.start);
+            periodStart.setHours(0, 0, 0, 0);
+            
+            if (periodStart <= startOfDate) {
+                relevantPeriod = range;
+            } else {
+                break; // Periods are sorted, so we can stop here
+            }
+        }
+
+        if (!relevantPeriod || !relevantPeriod.start) return 0;
+
+        // Calculate the cycle day from the relevant period
+        const cycleStart = relevantPeriod.start;
+        const cycleLength = Math.floor((startOfDate.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
 
         return cycleLength + 1; // Add 1 to make it 1-based
     }

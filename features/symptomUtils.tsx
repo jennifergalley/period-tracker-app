@@ -1,3 +1,5 @@
+import { CycleUtils } from '@/features/CycleUtils';
+
 /**
  * Default symptoms list for new users.
  */
@@ -49,5 +51,44 @@ export class SymptomUtils {
         return Object.values(symptomCounts)
             .sort((a, b) => b.count - a.count)
             .slice(0, topN);
+    }
+
+    /**
+     * Computes symptom frequency by cycle day for heatmap visualization.
+     * @param symptomLogs - An object where keys are dates (YYYY-MM-DD) and values are arrays of symptom names.
+     * @param periodRanges - The list of period ranges to determine cycle days.
+     * @param symptomNames - Array of symptom names to analyze.
+     * @param maxCycleDay - Maximum cycle day to include (default 35).
+     * @returns An object mapping symptom names to arrays of counts per cycle day.
+     */
+    static computeSymptomByCycleDay(
+        symptomLogs: { [date: string]: string[] },
+        periodRanges: any,
+        symptomNames: string[],
+        maxCycleDay: number = 35
+    ): { [symptomName: string]: number[] } {        
+        // Initialize result object with arrays of zeros for each symptom
+        const result: { [symptomName: string]: number[] } = {};
+        symptomNames.forEach(name => {
+            result[name] = new Array(maxCycleDay).fill(0);
+        });
+
+        // Process each date in symptomLogs
+        Object.keys(symptomLogs).forEach(dateKey => {
+            const date = new Date(dateKey);
+            const cycleDay = CycleUtils.getCycleDay(periodRanges, date);
+            
+            // Only count if we have a valid cycle day and it's within range
+            if (cycleDay > 0 && cycleDay <= maxCycleDay) {
+                const symptoms = symptomLogs[dateKey];
+                symptoms.forEach(symptomName => {
+                    if (symptomNames.includes(symptomName)) {
+                        result[symptomName][cycleDay - 1]++; // -1 because array is 0-indexed
+                    }
+                });
+            }
+        });
+
+        return result;
     }
 }
