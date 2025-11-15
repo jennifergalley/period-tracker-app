@@ -37,3 +37,6 @@ yarn-error.*
 
 # apk backups
 apk
+
+# coverage reports
+coverage/

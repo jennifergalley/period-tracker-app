@@ -1,0 +1,569 @@
+{
+  "exportDate": "2025-11-15T02:40:17.932Z",
+  "appVersion": "1.0.0",
+  "data": {
+    "weightLogs": {
+      "2024-07-01": 148.5,
+      "2024-07-15": 149.2,
+      "2024-08-01": 148.8,
+      "2024-08-15": 148.3,
+      "2024-09-01": 147.9,
+      "2024-09-15": 147.5,
+      "2024-10-01": 147.2,
+      "2024-10-15": 146.8,
+      "2024-11-01": 146.5,
+      "2024-11-15": 146.2,
+      "2024-12-01": 146.0,
+      "2024-12-15": 145.8,
+      "2025-01-01": 145.6,
+      "2025-01-15": 145.5,
+      "2025-02-01": 146.2,
+      "2025-02-15": 147.0,
+      "2025-03-01": 146.8,
+      "2025-03-15": 145.9,
+      "2025-04-01": 146.5,
+      "2025-04-15": 147.2,
+      "2025-05-01": 146.0,
+      "2025-05-15": 145.5,
+      "2025-06-01": 145.8,
+      "2025-06-15": 146.3,
+      "2025-07-01": 147.1,
+      "2025-07-15": 146.7,
+      "2025-08-01": 146.2,
+      "2025-08-15": 145.9,
+      "2025-09-01": 146.4,
+      "2025-09-15": 147.0,
+      "2025-10-01": 146.8,
+      "2025-10-15": 146.1,
+      "2025-11-01": 145.7,
+      "2025-11-14": 146.0
+    },
+    "weightUnit": "lbs",
+    "periodRanges": {
+      "ranges": [
+        {
+          "start": "2024-07-05",
+          "end": "2024-07-09"
+        },
+        {
+          "start": "2024-08-03",
+          "end": "2024-08-07"
+        },
+        {
+          "start": "2024-09-01",
+          "end": "2024-09-05"
+        },
+        {
+          "start": "2024-10-02",
+          "end": "2024-10-06"
+        },
+        {
+          "start": "2024-11-03",
+          "end": "2024-11-07"
+        },
+        {
+          "start": "2024-12-05",
+          "end": "2024-12-09"
+        },
+        {
+          "start": "2025-01-12",
+          "end": "2025-01-16"
+        },
+        {
+          "start": "2025-02-04",
+          "end": "2025-02-08"
+        },
+        {
+          "start": "2025-03-05",
+          "end": "2025-03-09"
+        },
+        {
+          "start": "2025-04-04",
+          "end": "2025-04-08"
+        },
+        {
+          "start": "2025-05-02",
+          "end": "2025-05-06"
+        },
+        {
+          "start": "2025-06-03",
+          "end": "2025-06-07"
+        },
+        {
+          "start": "2025-07-02",
+          "end": "2025-07-06"
+        },
+        {
+          "start": "2025-08-01",
+          "end": "2025-08-05"
+        },
+        {
+          "start": "2025-09-03",
+          "end": "2025-09-07"
+        },
+        {
+          "start": "2025-10-04",
+          "end": "2025-10-08"
+        },
+        {
+          "start": "2025-11-02",
+          "end": "2025-11-06"
+        }
+      ]
+    },
+    "symptomLogs": {
+      "2024-07-05": ["Cramps", "Bloating", "Back Pain"],
+      "2024-07-06": ["Cramps", "Fatigue", "Diarrhea"],
+      "2024-07-07": ["Headache", "Tender Breasts"],
+      "2024-07-15": ["Horny", "Tender Breasts"],
+      "2024-07-22": ["Mood Swings", "Irritable"],
+      "2024-08-03": ["Cramps", "Back Pain", "Spotting"],
+      "2024-08-04": ["Cramps", "Diarrhea", "Bloating"],
+      "2024-08-05": ["Fatigue", "Headache"],
+      "2024-08-12": ["Tender Breasts", "Horny"],
+      "2024-08-20": ["Bloating", "Hunger", "Mood Swings"],
+      "2024-09-01": ["Cramps", "Back Pain", "Fatigue"],
+      "2024-09-02": ["Cramps", "Constipation", "Bloating"],
+      "2024-09-03": ["Headache", "Tender Breasts", "Depression"],
+      "2024-09-10": ["Horny", "Hunger"],
+      "2024-09-18": ["Mood Swings", "Irritable", "Bloating"],
+      "2024-10-02": ["Cramps", "Back Pain", "Diarrhea"],
+      "2024-10-03": ["Cramps", "Fatigue", "Spotting"],
+      "2024-10-04": ["Bloating", "Headache", "Dehydration"],
+      "2024-10-11": ["Tender Breasts", "Horny"],
+      "2024-10-19": ["Depression", "Mood Swings"],
+      "2024-11-03": ["Cramps", "Back Pain", "Bloating"],
+      "2024-11-04": ["Cramps", "Diarrhea", "Fatigue"],
+      "2024-11-05": ["Headache", "Tender Breasts"],
+      "2024-11-13": ["Horny", "Hunger", "Tender Breasts"],
+      "2024-11-21": ["Bloating", "Irritable"],
+      "2024-12-05": ["Cramps", "Back Pain", "Spotting"],
+      "2024-12-06": ["Cramps", "Fatigue", "Constipation"],
+      "2024-12-07": ["Bloating", "Headache"],
+      "2024-12-15": ["Tender Breasts", "Horny"],
+      "2024-12-23": ["Mood Swings", "Depression", "Hunger"],
+      "2025-01-12": ["Cramps", "Bloating", "Fatigue"],
+      "2025-01-13": ["Cramps", "Headache", "Back Pain"],
+      "2025-01-14": ["Fatigue", "Tender Breasts"],
+      "2025-01-20": ["Tender Breasts", "Mood Swings"],
+      "2025-01-25": ["Hunger", "Bloating"],
+      "2025-02-04": ["Cramps", "Back Pain", "Fatigue"],
+      "2025-02-05": ["Cramps", "Diarrhea", "Bloating"],
+      "2025-02-06": ["Headache", "Fatigue"],
+      "2025-02-12": ["Tender Breasts", "Horny"],
+      "2025-02-18": ["Mood Swings", "Depression"],
+      "2025-03-05": ["Cramps", "Bloating", "Back Pain"],
+      "2025-03-06": ["Cramps", "Fatigue", "Constipation"],
+      "2025-03-07": ["Headache", "Tender Breasts"],
+      "2025-03-15": ["Horny", "Tender Breasts"],
+      "2025-03-20": ["Bloating", "Hunger"],
+      "2025-04-04": ["Cramps", "Back Pain", "Spotting"],
+      "2025-04-05": ["Cramps", "Diarrhea", "Fatigue"],
+      "2025-04-06": ["Bloating", "Headache"],
+      "2025-04-14": ["Tender Breasts", "Horny"],
+      "2025-04-22": ["Mood Swings", "Irritable"],
+      "2025-05-02": ["Cramps", "Back Pain", "Bloating"],
+      "2025-05-03": ["Cramps", "Fatigue", "Dehydration"],
+      "2025-05-04": ["Headache", "Tender Breasts"],
+      "2025-05-12": ["Horny", "Hunger"],
+      "2025-05-18": ["Bloating", "Mood Swings"],
+      "2025-06-01": ["Tender Breasts", "Back Pain"],
+      "2025-06-02": ["Depression", "Hunger", "Bloating"],
+      "2025-06-03": ["Cramps", "Back Pain", "Fatigue"],
+      "2025-06-04": ["Cramps", "Diarrhea", "Spotting"],
+      "2025-06-05": ["Headache", "Bloating"],
+      "2025-06-09": ["Depression", "Diarrhea", "Tender Breasts", "Cramps"],
+      "2025-06-10": ["Cramps", "Dehydration", "Tender Breasts"],
+      "2025-06-13": ["Tender Breasts", "Back Pain", "Horny"],
+      "2025-06-20": ["Mood Swings", "Hunger"],
+      "2025-07-02": ["Cramps", "Bloating", "Back Pain"],
+      "2025-07-03": ["Cramps", "Fatigue", "Constipation"],
+      "2025-07-04": ["Headache", "Tender Breasts"],
+      "2025-07-11": ["Horny", "Tender Breasts"],
+      "2025-07-18": ["Bloating", "Irritable"],
+      "2025-08-01": ["Cramps", "Back Pain", "Diarrhea"],
+      "2025-08-02": ["Cramps", "Fatigue", "Spotting"],
+      "2025-08-03": ["Bloating", "Headache"],
+      "2025-08-10": ["Tender Breasts", "Horny"],
+      "2025-08-16": ["Mood Swings", "Depression"],
+      "2025-09-03": ["Cramps", "Back Pain", "Bloating"],
+      "2025-09-04": ["Cramps", "Diarrhea", "Fatigue"],
+      "2025-09-05": ["Headache", "Tender Breasts"],
+      "2025-09-12": ["Horny", "Hunger"],
+      "2025-09-20": ["Bloating", "Irritable", "Mood Swings"],
+      "2025-10-04": ["Cramps", "Back Pain", "Spotting"],
+      "2025-10-05": ["Cramps", "Fatigue", "Constipation"],
+      "2025-10-06": ["Bloating", "Headache"],
+      "2025-10-14": ["Tender Breasts", "Horny"],
+      "2025-10-22": ["Mood Swings", "Depression"],
+      "2025-11-02": ["Cramps", "Back Pain", "Bloating"],
+      "2025-11-03": ["Cramps", "Diarrhea", "Fatigue"],
+      "2025-11-04": ["Headache", "Tender Breasts"],
+      "2025-11-10": ["Horny", "Hunger"]
+    },
+    "allSymptoms": [
+      {
+        "name": "Cramps",
+        "icon": "💢"
+      },
+      {
+        "name": "Headache",
+        "icon": "🤕"
+      },
+      {
+        "name": "Bloating",
+        "icon": "💨"
+      },
+      {
+        "name": "Mood Swings",
+        "icon": "😡"
+      },
+      {
+        "name": "Fatigue",
+        "icon": "😴"
+      },
+      {
+        "name": "Tender Breasts",
+        "icon": "🤲"
+      },
+      {
+        "name": "Hunger",
+        "icon": "🍽️"
+      },
+      {
+        "name": "Diarrhea",
+        "icon": "💩"
+      },
+      {
+        "name": "Constipation",
+        "icon": "🚽"
+      },
+      {
+        "name": "Dehydration",
+        "icon": "🥤"
+      },
+      {
+        "name": "Irritable",
+        "icon": "🤬"
+      },
+      {
+        "name": "Depression",
+        "icon": "😭"
+      },
+      {
+        "name": "Spotting",
+        "icon": "🩸"
+      },
+      {
+        "name": "Back Pain",
+        "icon": "💢"
+      },
+      {
+        "name": "Horny",
+        "icon": "😏"
+      }
+    ],
+    "textLogs": {
+      "2024-07-10": "Had a really rough period this month. Taking it easy today.",
+      "2024-08-15": "Feeling great! Energetic and productive.",
+      "2024-09-20": "PMS symptoms are hitting hard today.",
+      "2024-10-12": "Started a new workout routine this week.",
+      "2024-11-28": "Thanksgiving was amazing, but ate way too much!",
+      "2024-12-31": "New Year's resolution: be more mindful of my health.",
+      "2025-01-22": "Trying out a new supplement for cramps.",
+      "2025-02-14": "Valentine's Day with bae 💕",
+      "2025-03-18": "Spring weather is lifting my mood!",
+      "2025-04-25": "Had a great appointment with my doctor today.",
+      "2025-05-30": "Memorial Day weekend was so relaxing.",
+      "2025-06-15": "Summer vibes are here!",
+      "2025-08-22": "Feeling a bit down this week, but managing.",
+      "2025-09-28": "Fall is my favorite season - feeling good!",
+      "2025-10-31": "Happy Halloween! 🎃",
+      "2025-11-14": "this is just a test"
+    },
+    "sexLogs": {
+      "2024-07-15": ["Protected"],
+      "2024-07-20": ["Protected"],
+      "2024-08-08": ["Protected"],
+      "2024-08-12": ["Unprotected"],
+      "2024-08-25": ["Protected"],
+      "2024-09-06": ["Protected"],
+      "2024-09-14": ["Protected"],
+      "2024-09-28": ["Protected", "Oral"],
+      "2024-10-10": ["Unprotected"],
+      "2024-10-18": ["Protected"],
+      "2024-11-01": ["Protected"],
+      "2024-11-12": ["Protected", "Oral"],
+      "2024-11-23": ["Protected"],
+      "2024-12-10": ["Protected"],
+      "2024-12-20": ["Unprotected"],
+      "2024-12-31": ["Protected"],
+      "2025-01-08": ["Protected"],
+      "2025-01-18": ["Protected"],
+      "2025-02-02": ["Protected", "Oral"],
+      "2025-02-14": ["Protected"],
+      "2025-02-24": ["Protected"],
+      "2025-03-12": ["Unprotected"],
+      "2025-03-22": ["Protected"],
+      "2025-04-05": ["Protected"],
+      "2025-04-16": ["Protected"],
+      "2025-04-28": ["Protected", "Oral"],
+      "2025-05-09": ["Protected"],
+      "2025-05-19": ["Unprotected"],
+      "2025-06-08": ["Protected"],
+      "2025-06-18": ["Protected"],
+      "2025-07-07": ["Protected"],
+      "2025-07-15": ["Protected", "Oral"],
+      "2025-07-29": ["Protected"],
+      "2025-08-11": ["Protected"],
+      "2025-08-21": ["Protected"],
+      "2025-09-10": ["Unprotected"],
+      "2025-09-24": ["Protected"],
+      "2025-10-11": ["Protected"],
+      "2025-10-25": ["Protected", "Oral"],
+      "2025-11-08": ["Protected"],
+      "2025-11-14": ["Unprotected"]
+    },
+    "moodLogs": {
+      "2024-07-05": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2024-07-15": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2024-07-23": {
+        "mood": 3,
+        "anxiety": 2,
+        "depression": 1
+      },
+      "2024-08-03": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2024-08-12": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2024-08-20": {
+        "mood": 3,
+        "anxiety": 2,
+        "depression": 2
+      },
+      "2024-09-01": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2024-09-10": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 0
+      },
+      "2024-09-18": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 3
+      },
+      "2024-10-02": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2024-10-11": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2024-10-19": {
+        "mood": 2,
+        "anxiety": 2,
+        "depression": 4
+      },
+      "2024-11-03": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2024-11-13": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 0
+      },
+      "2024-11-21": {
+        "mood": 3,
+        "anxiety": 2,
+        "depression": 1
+      },
+      "2024-12-05": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2024-12-15": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2024-12-23": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 1
+      },
+      "2025-01-12": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2025-01-20": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 0
+      },
+      "2025-02-04": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2025-02-14": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-03-05": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2025-03-15": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-04-04": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2025-04-14": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 0
+      },
+      "2025-05-02": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2025-05-12": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-06-03": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 4
+      },
+      "2025-06-13": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 0
+      },
+      "2025-07-01": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-07-09": {
+        "mood": 0,
+        "anxiety": 2,
+        "depression": 0
+      },
+      "2025-07-17": {
+        "mood": 4,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-07-24": {
+        "mood": 0,
+        "anxiety": 0,
+        "depression": 4
+      },
+      "2025-07-27": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 1
+      },
+      "2025-08-01": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2025-08-09": {
+        "mood": 4,
+        "anxiety": 2,
+        "depression": 5
+      },
+      "2025-08-16": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 4
+      },
+      "2025-09-03": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2025-09-12": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-09-20": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 3
+      },
+      "2025-10-04": {
+        "mood": 1,
+        "anxiety": 4,
+        "depression": 3
+      },
+      "2025-10-14": {
+        "mood": 5,
+        "anxiety": 0,
+        "depression": 0
+      },
+      "2025-10-22": {
+        "mood": 2,
+        "anxiety": 2,
+        "depression": 4
+      },
+      "2025-11-02": {
+        "mood": 2,
+        "anxiety": 3,
+        "depression": 2
+      },
+      "2025-11-10": {
+        "mood": 4,
+        "anxiety": 1,
+        "depression": 0
+      }
+    },
+    "autoAddPeriodDays": true,
+    "typicalPeriodLength": 5,
+    "showOvulation": true,
+    "showFertileWindow": true,
+    "showSymptomsLog": true,
+    "showWeightLog": true,
+    "showSexLog": true,
+    "showMoodLog": true,
+    "showNotesLog": true
+  }
+}
