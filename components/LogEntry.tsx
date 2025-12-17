@@ -55,6 +55,8 @@ export default function LogEntry(props: LogEntryProps) {
     showSexLog,
     showMoodLog,
     showNotesLog,
+    predictedPeriods,
+    logSectionOrder,
   } = useAppState();
 
   const [showSymptoms, setShowSymptoms] = useState(true);
@@ -98,6 +100,14 @@ export default function LogEntry(props: LogEntryProps) {
   // Compute cycle day
   const cycleDay = CycleUtils.getCycleDay(periodRanges, date);
 
+  // Compute days late (only relevant for today)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0);
+  const isToday = today.getTime() === normalizedDate.getTime();
+  const daysLate = isToday ? CycleUtils.calculateDaysLate(predictedPeriods, periodRanges, today) : 0;
+
   // Sort symptoms by frequency (most to least)
   const sortedSymptoms = useMemo(() => {
     // Calculate frequency for each symptom
@@ -127,44 +137,34 @@ export default function LogEntry(props: LogEntryProps) {
     }
   }, [editingSymptom]);
 
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: theme.background }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-    >
-      {/* --- Main Day View Scrollable Content --- */}
-      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
-        
-        {/* --- Date and Cycle Status --- */}
-        <Text style={[styles.date, { color: theme.text }]}>{date.toDateString()}</Text>
-        {cycleDay > 0 && (
-          <Text style={[styles.cycleDay, { color: theme.text, marginBottom: 4 }]}>Cycle Day: {cycleDay}</Text>
-        )}
-        {isPeriod && <Text style={[styles.period, { color: theme.period }]}>Period Day</Text>}
-        {isFertile && <Text style={[styles.fertile, { color: theme.fertile }]}>Fertile Window</Text>}
-        {isOvulation && <Text style={[styles.ovulation, { color: theme.ovulation }]}>Ovulation Day</Text>}
+  // Render a log section based on its ID
+  const renderSection = (sectionId: string) => {
+    switch (sectionId) {
+      case 'symptoms':
+        return renderSymptomsSection();
+      case 'weight':
+        return renderWeightSection();
+      case 'sex':
+        return renderSexSection();
+      case 'mood':
+        return renderMoodSection();
+      case 'notes':
+        return renderNotesSection();
+      default:
+        return null;
+    }
+  };
 
-        {/* --- Log Period Button --- */}
-        <TouchableOpacity
-          style={[styles.weightSaveBtn, { backgroundColor: theme.accent }]}
-          onPress={() => handleTogglePeriod(date, periodRanges, setPeriodRanges, autoAddPeriodDays, typicalPeriodLength)}
-        >
-          <Text style={[styles.weightSaveBtnText, { color: theme.background }]}> 
-            {isPeriod
-              ? 'Remove Period'
-              : 'Log Period'}
-          </Text>
+  // --- Symptoms Section ---
+  const renderSymptomsSection = () => {
+    if (!showSymptomsLog) return null;
+    return (
+      <View key="symptoms" style={{ width: '100%' }}>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }} onPress={() => setShowSymptoms(s => !s)}>
+          <Text style={[styles.symptomHeader, { color: theme.text }]}>Symptoms</Text>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>{showSymptoms ? '▲' : '▼'}</Text>
         </TouchableOpacity>
-
-        {/* --- Symptom Logging Section --- */}
-        {showSymptomsLog && (
-          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }} onPress={() => setShowSymptoms(s => !s)}>
-            <Text style={[styles.symptomHeader, { color: theme.text }]}>Symptoms</Text>
-            <Text style={{ color: theme.accent, fontSize: 18 }}>{showSymptoms ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
-        )}
-        {showSymptoms && showSymptomsLog && (
+        {showSymptoms && (
           <View style={styles.symptomListVertical}>
             {(showAllSymptoms ? sortedSymptoms : sortedSymptoms.slice(0, 10)).map(symptom => (
               <TouchableOpacity
@@ -195,7 +195,6 @@ export default function LogEntry(props: LogEntryProps) {
               </TouchableOpacity>
             ))}
 
-            {/* --- See All / See Less Button --- */}
             {sortedSymptoms.length > 10 && (
               <TouchableOpacity
                 style={{ alignItems: 'center', paddingVertical: 12, marginTop: 4 }}
@@ -207,7 +206,6 @@ export default function LogEntry(props: LogEntryProps) {
               </TouchableOpacity>
             )}
 
-            {/* --- Add/Edit Custom Symptom Row --- */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
               <TextInput
                 style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: theme.inputBg, borderColor: theme.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 8, fontSize: 20, textAlign: 'center', color: theme.inputText }}
@@ -227,16 +225,23 @@ export default function LogEntry(props: LogEntryProps) {
                 onChangeText={setNewSymptom}
                 onSubmitEditing={() => {
                   if (editingSymptom) {
-                    // Save edit
                     const trimmedName = newSymptom.trim();
                     const trimmedIcon = newSymptomEmoji.trim() || '📝';
                     if (!trimmedName) return;
                     setAllSymptoms(prev => prev.map(s =>
                       s.name === (editingSymptom?.name ?? '') ? { name: trimmedName, icon: trimmedIcon } : s
                     ));
+                    setSymptomLogs(prev => {
+                      const updated = { ...prev };
+                      for (const key of Object.keys(updated)) {
+                        updated[key] = updated[key].map(name => name === editingSymptom.name ? trimmedName : name);
+                      }
+                      return updated;
+                    });
                     setEditingSymptom(null);
                     setNewSymptom('');
                     setNewSymptomEmoji('');
+                    setShowSymptomAdded(true);
                   } else if (newSymptom.trim()) {
                     setAllSymptoms(prev => prev.some(s => s.name === newSymptom.trim())
                       ? prev
@@ -258,9 +263,17 @@ export default function LogEntry(props: LogEntryProps) {
                       setAllSymptoms(prev => prev.map(s =>
                         s.name === (editingSymptom?.name ?? '') ? { name: trimmedName, icon: trimmedIcon } : s
                       ));
+                      setSymptomLogs(prev => {
+                        const updated = { ...prev };
+                        for (const key of Object.keys(updated)) {
+                          updated[key] = updated[key].map(name => name === editingSymptom.name ? trimmedName : name);
+                        }
+                        return updated;
+                      });
                       setEditingSymptom(null);
                       setNewSymptom('');
                       setNewSymptomEmoji('');
+                      setShowSymptomAdded(true);
                     }}
                   >
                     <Text style={{ color: theme.background, fontWeight: 'bold' }}>Save</Text>
@@ -295,7 +308,6 @@ export default function LogEntry(props: LogEntryProps) {
               )}
             </View>
 
-            {/* --- Symptom added confirmation --- */}
             {showSymptomAdded && (
               <View style={{ position: 'absolute', top: 60, alignSelf: 'center', backgroundColor: theme.accent, borderRadius: 8, padding: 12, zIndex: 100 }}>
                 <Text style={{ color: theme.background, fontWeight: 'bold', fontSize: 16 }}>Symptom added!</Text>
@@ -303,15 +315,20 @@ export default function LogEntry(props: LogEntryProps) {
             )}
           </View>
         )}
+      </View>
+    );
+  };
 
-        {/* --- Weight Logging Section --- */}
-        {showWeightLog && (
-          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowWeight(s => !s)}>
-            <Text style={[styles.weightHeader, { color: theme.text }]}>Weight</Text>
-            <Text style={{ color: theme.accent, fontSize: 18 }}>{showWeight ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
-        )}
-        {showWeight && showWeightLog && (
+  // --- Weight Section ---
+  const renderWeightSection = () => {
+    if (!showWeightLog) return null;
+    return (
+      <View key="weight" style={{ width: '100%' }}>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowWeight(s => !s)}>
+          <Text style={[styles.weightHeader, { color: theme.text }]}>Weight</Text>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>{showWeight ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {showWeight && (
           <View style={styles.weightRow}>
             <TextInput
               style={[styles.weightInput, { width: 100, backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
@@ -320,14 +337,11 @@ export default function LogEntry(props: LogEntryProps) {
               value={weightInputValue}
               onChangeText={setWeightInputValue}
               onBlur={() => {
-                // Only save when input is valid and not empty
                 const trimmed = weightInputValue.trim();
-                // Allow empty string to clear the log
                 if (trimmed === '') {
                   handleLogWeight(undefined, weightUnit, date, setWeightLogs);
                 } else {
                   const val = parseFloat(trimmed);
-                  console.log('Parsed weight:', trimmed, "to val:", val);
                   if (!isNaN(val)) {
                     handleLogWeight(val, weightUnit, date, setWeightLogs);
                   }
@@ -339,15 +353,20 @@ export default function LogEntry(props: LogEntryProps) {
             />
           </View>
         )}
+      </View>
+    );
+  };
 
-        {/* --- Sex Logging Section --- */}
-        {showSexLog && (
-          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowSexLog((s: boolean) => !s)}>
-            <Text style={[styles.symptomHeader, { color: theme.text }]}>Sex</Text>
-            <Text style={{ color: theme.accent, fontSize: 18 }}>{toggleSexLogVisible ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
-        )}
-        {toggleSexLogVisible && showSexLog && (
+  // --- Sex Section ---
+  const renderSexSection = () => {
+    if (!showSexLog) return null;
+    return (
+      <View key="sex" style={{ width: '100%' }}>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowSexLog((s: boolean) => !s)}>
+          <Text style={[styles.symptomHeader, { color: theme.text }]}>Sex</Text>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>{toggleSexLogVisible ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {toggleSexLogVisible && (
           <View style={styles.symptomListVertical}>
             {sexTypes.map(sexType => (
               <TouchableOpacity
@@ -363,17 +382,21 @@ export default function LogEntry(props: LogEntryProps) {
             ))}
           </View>
         )}
+      </View>
+    );
+  };
 
-        {/* --- Mood/Anxiety/Depression Sliders --- */}
-        {showMoodLog && (
-          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowMoodLog(s => !s)}>
-            <Text style={[styles.symptomHeader, { color: theme.text }]}>Mood & Mental Health</Text>
-            <Text style={{ color: theme.accent, fontSize: 18 }}>{toggleMoodLogVisible ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
-        )}
-        {toggleMoodLogVisible && showMoodLog && (
+  // --- Mood Section ---
+  const renderMoodSection = () => {
+    if (!showMoodLog) return null;
+    return (
+      <View key="mood" style={{ width: '100%' }}>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', marginTop: 18 }} onPress={() => setShowMoodLog(s => !s)}>
+          <Text style={[styles.symptomHeader, { color: theme.text }]}>Mood & Mental Health</Text>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>{toggleMoodLogVisible ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {toggleMoodLogVisible && (
           <View style={{ width: '100%', marginBottom: 8, backgroundColor: theme.card, borderRadius: 12, padding: 16 }}>
-            {/* Mood Slider */}
             <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Mood {moodEmojis[moodLog.mood]}</Text>
             <Slider
               value={moodLog.mood}
@@ -393,7 +416,6 @@ export default function LogEntry(props: LogEntryProps) {
                 <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx === moodLog.mood ? 1 : 0.6 }}>{emoji}</Text>
               ))}
             </View>
-            {/* Anxiety Slider */}
             <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Anxiety {anxietyEmojis[moodLog.anxiety]}</Text>
             <Slider
               value={moodLog.anxiety}
@@ -413,7 +435,6 @@ export default function LogEntry(props: LogEntryProps) {
                 <Text key={emoji} style={{ color: theme.text, fontSize: 22, opacity: idx === moodLog.anxiety ? 1 : 0.6 }}>{emoji}</Text>
               ))}
             </View>
-            {/* Depression Slider */}
             <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 4 }}>Depression {depressionEmojis[moodLog.depression]}</Text>
             <Slider
               value={moodLog.depression}
@@ -435,24 +456,68 @@ export default function LogEntry(props: LogEntryProps) {
             </View>
           </View>
         )}
+      </View>
+    );
+  };
 
-        {/* --- Text Log Section --- */}
-        {showNotesLog && (
-          <>
-            <Text style={[styles.textLogHeader, { color: theme.text }]}>Notes</Text>
-            <TextInput
-              style={[styles.textLogInput, { backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
-              multiline
-              numberOfLines={6}
-              value={textLog}
-              onChangeText={text => handleLogText(date, text, setTextLogs)}
-              placeholder="Write anything about today..."
-              placeholderTextColor={theme.legendText}
-              textAlignVertical="top"
-              returnKeyType="done"
-            />
-          </>
+  // --- Notes Section ---
+  const renderNotesSection = () => {
+    if (!showNotesLog) return null;
+    return (
+      <View key="notes" style={{ width: '100%', marginTop: 18 }}>
+        <Text style={[styles.textLogHeader, { color: theme.text }]}>Notes</Text>
+        <TextInput
+          style={[styles.textLogInput, { backgroundColor: theme.inputBg, color: theme.inputText, borderColor: theme.border }]}
+          multiline
+          numberOfLines={6}
+          value={textLog}
+          onChangeText={text => handleLogText(date, text, setTextLogs)}
+          placeholder="Write anything about today..."
+          placeholderTextColor={theme.legendText}
+          textAlignVertical="top"
+          returnKeyType="done"
+        />
+      </View>
+    );
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: theme.background }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      {/* --- Main Day View Scrollable Content --- */}
+      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
+        
+        {/* --- Date and Cycle Status --- */}
+        <Text style={[styles.date, { color: theme.text }]}>{date.toDateString()}</Text>
+        {daysLate > 0 && (
+          <Text style={[styles.lateText, { color: theme.period }]}>
+            You are late by {daysLate} {daysLate === 1 ? 'day' : 'days'}
+          </Text>
         )}
+        {cycleDay > 0 && (
+          <Text style={[styles.cycleDay, { color: theme.text, marginBottom: 4 }]}>Cycle Day: {cycleDay}</Text>
+        )}
+        {isPeriod && <Text style={[styles.period, { color: theme.period }]}>Period Day</Text>}
+        {isFertile && <Text style={[styles.fertile, { color: theme.fertile }]}>Fertile Window</Text>}
+        {isOvulation && <Text style={[styles.ovulation, { color: theme.ovulation }]}>Ovulation Day</Text>}
+
+        {/* --- Log Period Button --- */}
+        <TouchableOpacity
+          style={[styles.weightSaveBtn, { backgroundColor: theme.accent }]}
+          onPress={() => handleTogglePeriod(date, periodRanges, setPeriodRanges, autoAddPeriodDays, typicalPeriodLength)}
+        >
+          <Text style={[styles.weightSaveBtnText, { color: theme.background }]}> 
+            {isPeriod
+              ? 'Remove Period'
+              : 'Log Period'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* --- Dynamic Log Sections (ordered by user preference) --- */}
+        {logSectionOrder.map(sectionId => renderSection(sectionId))}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -461,6 +526,7 @@ export default function LogEntry(props: LogEntryProps) {
 const styles = StyleSheet.create({
   container: { padding: 24, alignItems: 'center' },
   date: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
+  lateText: { fontWeight: 'bold', marginBottom: 8, fontSize: 20 },
   cycleDay: { fontWeight: 'bold', marginBottom: 8, fontSize: 18 },
   period: { fontWeight: 'bold', marginBottom: 4, fontSize: 18 },
   fertile: { fontWeight: 'bold', marginBottom: 4, fontSize: 18 },
@@ -477,7 +543,7 @@ const styles = StyleSheet.create({
   addSymptomBtn: { borderRadius: 8, paddingVertical: 8, paddingHorizontal: 16 },
   addSymptomBtnText: { fontWeight: 'bold', fontSize: 15 },
   weightHeader: { fontWeight: 'bold', fontSize: 16 },
-  weightRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18, marginBottom: 4 },
+  weightRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 18, marginBottom: 4 },
   weightInput: { borderRadius: 8, padding: 8, width: 60, marginRight: 8, textAlign: 'center' },
   weightSaveBtn: { borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
   weightSaveBtnText: { fontWeight: 'bold', fontSize: 15 },

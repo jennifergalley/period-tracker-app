@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView, TextInput, Modal, Switch, Pressable, StyleSheet, Platform, ToastAndroid } from 'react-native';
-import { useAppState } from '@/components/AppStateContext';
+import { useAppState, DEFAULT_LOG_SECTION_ORDER } from '@/components/AppStateContext';
 import { useTheme } from '@/components/Theme';
 import * as FileSystem from 'expo-file-system';
 import { DEFAULT_SYMPTOMS } from '@/features/SymptomUtils';
 import { DateRangeList } from '@/features/DateRangeList';
 import { CommonStyles } from '@/components/CommonStyles';
 import { AppDataUtils } from '@/features/AppDataUtils';
+import { requestNotificationPermissions } from '@/features/NotificationService';
+
+// Human-readable labels for log sections
+const LOG_SECTION_LABELS: { [key: string]: string } = {
+  symptoms: 'Symptoms',
+  weight: 'Weight',
+  sex: 'Sex',
+  mood: 'Mood & Mental Health',
+  notes: 'Notes',
+};
 
 export default function SettingsScreen () {
   const appState = useAppState();
@@ -158,6 +168,55 @@ export default function SettingsScreen () {
         />
       </View>
 
+      {/* --- Notification Settings --- */}
+      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Notifications</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+        <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>Period Reminders</Text>
+        <Switch
+          value={appState.notificationsEnabled}
+          onValueChange={async (value) => {
+            if (value) {
+              const granted = await requestNotificationPermissions();
+              if (granted) {
+                appState.setNotificationsEnabled(true);
+              } else {
+                Alert.alert(
+                  'Permission Required',
+                  'Please enable notifications in your device settings to receive period reminders.'
+                );
+              }
+            } else {
+              appState.setNotificationsEnabled(false);
+            }
+          }}
+          trackColor={{ false: theme.border, true: theme.accent }}
+          thumbColor={appState.notificationsEnabled ? theme.accent : theme.card}
+        />
+      </View>
+      
+      {appState.notificationsEnabled && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+          <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>
+            Days before period to remind:
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Pressable
+              onPress={() => appState.setPeriodReminderDays(d => Math.max(1, d - 1))}
+              style={{ backgroundColor: theme.card, borderRadius: 8, padding: 8, marginRight: 8 }}
+            >
+              <Text style={{ color: theme.text, fontSize: 20 }}>-</Text>
+            </Pressable>
+            <Text style={{ color: theme.text, fontSize: 18, minWidth: 32, textAlign: 'center' }}>{appState.periodReminderDays}</Text>
+            <Pressable
+              onPress={() => appState.setPeriodReminderDays(d => Math.min(14, d + 1))}
+              style={{ backgroundColor: theme.card, borderRadius: 8, padding: 8, marginLeft: 8 }}
+            >
+              <Text style={{ color: theme.text, fontSize: 20 }}>+</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {/* --- Log Type Visibility Toggles --- */}
       <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Show Log Types</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
@@ -211,6 +270,74 @@ export default function SettingsScreen () {
             thumbColor={appState.showNotesLog ? theme.accent : theme.card}
           />
         </View>
+      </View>
+
+      {/* --- Log Section Order --- */}
+      <Text style={{ color: theme.text, fontSize: 18, marginTop: 32, marginBottom: 8 }}>Log Section Order</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '90%' }}>
+        <Text style={{ color: theme.text, fontSize: 16, marginBottom: 8 }}>
+          Drag to reorder how sections appear in the log entry page.
+        </Text>
+      </View>
+      <View style={{ width: '90%', marginBottom: 16 }}>
+        {appState.logSectionOrder.map((sectionId, index) => (
+          <View 
+            key={sectionId} 
+            style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              marginBottom: 8, 
+              backgroundColor: theme.card, 
+              borderRadius: 8, 
+              padding: 12 
+            }}
+          >
+            <Text style={{ color: theme.text, fontSize: 16, flex: 1 }}>
+              {LOG_SECTION_LABELS[sectionId] || sectionId}
+            </Text>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (index > 0) {
+                    const newOrder = [...appState.logSectionOrder];
+                    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+                    appState.setLogSectionOrder(newOrder);
+                  }
+                }}
+                style={{ 
+                  padding: 8, 
+                  marginRight: 4,
+                  opacity: index === 0 ? 0.3 : 1 
+                }}
+                disabled={index === 0}
+              >
+                <Text style={{ color: theme.accent, fontSize: 18, fontWeight: 'bold' }}>▲</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  if (index < appState.logSectionOrder.length - 1) {
+                    const newOrder = [...appState.logSectionOrder];
+                    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+                    appState.setLogSectionOrder(newOrder);
+                  }
+                }}
+                style={{ 
+                  padding: 8,
+                  opacity: index === appState.logSectionOrder.length - 1 ? 0.3 : 1 
+                }}
+                disabled={index === appState.logSectionOrder.length - 1}
+              >
+                <Text style={{ color: theme.accent, fontSize: 18, fontWeight: 'bold' }}>▼</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+        <TouchableOpacity
+          onPress={() => appState.setLogSectionOrder(DEFAULT_LOG_SECTION_ORDER)}
+          style={{ alignItems: 'center', paddingVertical: 12, marginTop: 4 }}
+        >
+          <Text style={{ color: theme.accent, fontWeight: 'bold', fontSize: 14 }}>Reset to Default Order</Text>
+        </TouchableOpacity>
       </View>
 
       {/* --- Show App Storage --- */}

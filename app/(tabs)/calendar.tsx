@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LogEntry from '@/components/LogEntry';
 import { useAppState } from '@/components/AppStateContext';
@@ -8,6 +8,7 @@ import CalendarView from '@/components/CalendarView';
 import { Modal, Button, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import ActivityLog from '@/components/ActivityLog';
 import { CommonStyles } from '@/components/CommonStyles';
+import { CycleUtils } from '@/features/CycleUtils';
 
 export default function Calendar() {
   const { theme } = useTheme();
@@ -16,7 +17,8 @@ export default function Calendar() {
     showOvulation,
     showFertileWindow,
     predictedFertileWindow,
-    predictedOvulationDay
+    predictedOvulationDay,
+    predictedPeriods
   } = useAppState();
 
   const today = new Date();
@@ -29,6 +31,12 @@ export default function Calendar() {
   // Track where DayView was opened from
   const [openedFrom, setOpenedFrom] = useState<'ActivityLogModal' | 'CalendarView'>('CalendarView');
 
+  // Calculate if user is late
+  const daysLate = useMemo(
+    () => CycleUtils.calculateDaysLate(predictedPeriods, periodRanges, today),
+    [predictedPeriods, periodRanges]
+  );
+
   // Use predicted values from app state
   const ovulationDayToShow = showOvulation ? predictedOvulationDay : null;
   const fertileStartToShow = showFertileWindow ? predictedFertileWindow.start : null;
@@ -38,6 +46,15 @@ export default function Calendar() {
     <View style={[CommonStyles.container, { backgroundColor: theme.background }]}> 
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['left', 'right', 'bottom']}>
         
+      {/* --- Late Period Banner --- */}
+      {daysLate > 0 && (
+        <View style={[styles.lateBanner, { borderColor: theme.period }]}>
+          <Text style={[styles.lateBannerText, { color: theme.period }]}>
+            You are late by {daysLate} {daysLate === 1 ? 'day' : 'days'}
+          </Text>
+        </View>
+      )}
+
       {/* --- Calendar View --- */}
       <CalendarView
         setSelectedDay={setSelectedDay}
@@ -126,5 +143,20 @@ export default function Calendar() {
 };
 
 const styles = StyleSheet.create({
-  activityLog: { flexGrow: 0, flexShrink: 1, minHeight: 0, marginTop: 0, paddingTop: 0 },
+  activityLog: { flex: 1, marginTop: 0, paddingTop: 0 },
+  lateBanner: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    marginTop: 8,
+    marginBottom: 0,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+  },
+  lateBannerText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
 });

@@ -139,9 +139,9 @@ export default function ActivityLog({ onDayPress, onHeadingPress }: { onDayPress
 
               {/* --- Text Log for the Day --- */}
               {textLog && textLog.trim() !== '' && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 2 }}>
                   <Ionicons name='document-text-outline' color={theme.accent} size={24} style={{ marginRight: 4 }} />
-                  <Text style={[styles.logTextLog, { color: theme.text, marginTop: 0 }]}>{textLog}</Text>
+                  <Text style={[styles.logTextLog, { color: theme.text, marginTop: 0, flex: 1 }]} numberOfLines={3}>{textLog}</Text>
                 </View>
               )}
             </View>

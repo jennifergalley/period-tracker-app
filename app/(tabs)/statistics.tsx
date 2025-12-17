@@ -5,6 +5,7 @@ import { useTheme } from '@/components/Theme';
 import { CommonStyles } from '@/components/CommonStyles';
 import { SymptomUtils } from '@/features/SymptomUtils';
 import SymptomHeatmap from '@/components/SymptomHeatmap';
+import CycleLengthChart from '@/components/CycleLengthChart';
 
 function StatCard({ title, children }: { title: string; children: React.ReactNode }) {
   const { theme } = useTheme();
@@ -44,6 +45,11 @@ export default function StatisticsScreen() {
           <Text style={[styles.statValue, highlight('max'), { color: theme.text }]}>{userStats.maxCycleLength} days</Text>
         </View>
       </StatCard>
+
+      <StatCard title="Cycle Length History">
+        <CycleLengthChart />
+      </StatCard>
+
       <StatCard title="Period Length">
         <View style={styles.statRow}>
           <Text style={[styles.statLabel, { color: theme.text }]}>Average</Text>

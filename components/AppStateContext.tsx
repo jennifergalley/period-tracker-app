@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import { DateRange } from '@/features/DateRange';
 import { DateRangeList } from '@/features/DateRangeList';
 import { CycleUtils } from '@/features/CycleUtils';
+import { schedulePeriodReminders, cancelAllPeriodReminders, requestNotificationPermissions } from '@/features/NotificationService';
 
 // Types
 export type WeightUnit = 'kg' | 'lbs';
@@ -90,7 +91,20 @@ export interface AppState {
 
   userStats: UserStats;
   setUserStats: React.Dispatch<React.SetStateAction<UserStats>>;
+
+  // Notification settings
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  periodReminderDays: number;
+  setPeriodReminderDays: React.Dispatch<React.SetStateAction<number>>;
+
+  // Log section ordering
+  logSectionOrder: string[];
+  setLogSectionOrder: React.Dispatch<React.SetStateAction<string[]>>;
 }
+
+// Default order for log sections
+export const DEFAULT_LOG_SECTION_ORDER = ['symptoms', 'weight', 'sex', 'mood', 'notes'];
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
 
@@ -165,6 +179,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     periodLengths: [],
   });
 
+  // Notification settings
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+  const [periodReminderDays, setPeriodReminderDays] = useState<number>(7);
+
+  // Log section ordering
+  const [logSectionOrder, setLogSectionOrder] = useState<string[]>(DEFAULT_LOG_SECTION_ORDER);
+
   // Load state from storage on mount
   useEffect(() => {
     (async () => {
@@ -202,6 +223,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (typeof data.showWeightLog === 'boolean') setShowWeightLog(data.showWeightLog);
       if (typeof data.showNotesLog === 'boolean') setShowNotesLog(data.showNotesLog);
       if (data.userStats) setUserStats(data.userStats);
+      if (typeof data.notificationsEnabled === 'boolean') setNotificationsEnabled(data.notificationsEnabled);
+      if (typeof data.periodReminderDays === 'number') setPeriodReminderDays(data.periodReminderDays);
+      if (Array.isArray(data.logSectionOrder)) setLogSectionOrder(data.logSectionOrder);
     })();
   }, []);  
   
@@ -230,6 +254,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showWeightLog,
       showNotesLog,
       userStats,
+      notificationsEnabled,
+      periodReminderDays,
+      logSectionOrder,
     };
     storage.save(data);
   }, [
@@ -255,7 +282,19 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     showWeightLog,
     showNotesLog,
     userStats,
+    notificationsEnabled,
+    periodReminderDays,
+    logSectionOrder,
   ]);
+
+  // Schedule notifications when predictions change or notification settings change
+  useEffect(() => {
+    if (notificationsEnabled && predictedPeriods && !predictedPeriods.isEmpty()) {
+      schedulePeriodReminders(predictedPeriods, periodReminderDays);
+    } else if (!notificationsEnabled) {
+      cancelAllPeriodReminders();
+    }
+  }, [predictedPeriods, notificationsEnabled, periodReminderDays]);
   
   // Compute predictions when a new period is logged
   React.useEffect(() => {    
@@ -295,6 +334,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       showWeightLog, setShowWeightLog,
       showNotesLog, setShowNotesLog,
       userStats, setUserStats,
+      notificationsEnabled, setNotificationsEnabled,
+      periodReminderDays, setPeriodReminderDays,
+      logSectionOrder, setLogSectionOrder,
     }}>
       {children}
     </AppStateContext.Provider>

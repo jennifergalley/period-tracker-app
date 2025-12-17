@@ -255,5 +255,51 @@ export class CycleUtils {
             periodLengths,
         };
     }
+
+    /**
+     * Calculates how many days late the user is based on their predicted period.
+     * Returns 0 if not late, or a positive number indicating days late.
+     * @param predictedPeriods The list of predicted period ranges.
+     * @param periodRanges The list of actual logged period ranges.
+     * @param referenceDate The date to check lateness against (usually today).
+     * @returns Number of days late, or 0 if not late.
+     */
+    static calculateDaysLate(
+        predictedPeriods: DateRangeList,
+        periodRanges: DateRangeList,
+        referenceDate: Date
+    ): number {
+        if (!predictedPeriods?.ranges?.length) return 0;
+
+        // Sort predicted periods by start date
+        const sortedPredicted = [...predictedPeriods.ranges]
+            .filter(r => r.start)
+            .sort((a, b) => a.start!.getTime() - b.start!.getTime());
+
+        if (sortedPredicted.length === 0) return 0;
+
+        // Get the first predicted period (the next expected one)
+        const nextPredicted = sortedPredicted[0];
+        if (!nextPredicted.start) return 0;
+
+        const predictedStart = new Date(nextPredicted.start);
+        predictedStart.setHours(0, 0, 0, 0);
+        
+        const dateNormalized = new Date(referenceDate);
+        dateNormalized.setHours(0, 0, 0, 0);
+
+        // If reference date is before the predicted start, not late
+        if (dateNormalized < predictedStart) return 0;
+
+        // If the user is currently on their period (reference date is marked as period), not late
+        if (periodRanges.containsDate(dateNormalized)) return 0;
+
+        // Calculate days late (reference date - predicted start date)
+        const daysLate = Math.floor(
+            (dateNormalized.getTime() - predictedStart.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        return daysLate;
+    }
 }
 

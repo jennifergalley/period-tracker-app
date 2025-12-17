@@ -31,6 +31,16 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
 
+  // Refs to track current month/year for use in PanResponder
+  const monthRef = useRef(month);
+  const yearRef = useRef(year);
+
+  // Keep refs in sync with state
+  React.useEffect(() => {
+    monthRef.current = month;
+    yearRef.current = year;
+  }, [month, year]);
+
   // Use predicted values from app state
   const ovulationDayToShow = showOvulation ? predictedOvulationDay : null;
   const fertileStartToShow = showFertileWindow ? predictedFertileWindow.start : null;
@@ -83,6 +93,7 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
   }
 
   // PanResponder for swipe gestures on the calendar grid
+  // Uses refs to access current month/year values to avoid stale closure issues
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
@@ -90,9 +101,23 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
       },
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dx < -40) {
-          nextMonth();
+          // Swipe left - go to next month
+          const currentMonth = monthRef.current;
+          if (currentMonth === 11) {
+            setMonth(0);
+            setYear(y => y + 1);
+          } else {
+            setMonth(currentMonth + 1);
+          }
         } else if (gestureState.dx > 40) {
-          prevMonth();
+          // Swipe right - go to previous month
+          const currentMonth = monthRef.current;
+          if (currentMonth === 0) {
+            setMonth(11);
+            setYear(y => y - 1);
+          } else {
+            setMonth(currentMonth - 1);
+          }
         }
       },
     })
@@ -102,11 +127,11 @@ export default function CalendarView({ setSelectedDay, setDayModalVisible }: Cal
     <View style={{ backgroundColor: theme.background }}>
         {/* --- Calendar Header (Month/Year, Navigation) --- */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={prevMonth}><Text style={[CommonStyles.heading, { color: theme.text }]}>{'<  '}</Text></TouchableOpacity>
-          <Text style={[CommonStyles.heading, { color: theme.text }]}>
+          <TouchableOpacity onPress={prevMonth}><Text style={[CommonStyles.heading, { color: theme.text, marginTop: 12, marginBottom: 4 }]}>{'<  '}</Text></TouchableOpacity>
+          <Text style={[CommonStyles.heading, { color: theme.text, marginTop: 12, marginBottom: 4 }]}>
             {new Date(year, month, 1).toLocaleString('default', { month: 'long' })} {year}
           </Text>
-          <TouchableOpacity onPress={nextMonth}><Text style={[CommonStyles.heading, { color: theme.text }]}>{'  >'}</Text></TouchableOpacity>
+          <TouchableOpacity onPress={nextMonth}><Text style={[CommonStyles.heading, { color: theme.text, marginTop: 12, marginBottom: 4 }]}>{'  >'}</Text></TouchableOpacity>
         </View>
 
         {/* --- Calendar Legend --- */}
